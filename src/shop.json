@@ -1,0 +1,222 @@
+[
+    {
+      "store_id": 1,
+      "name": "周星星五金中環",
+      "region": "香港島",
+      "district": "中環",
+      "address": "中環皇后大道中181號101號舖",
+      "latitude": 22.2849,
+      "longitude": 114.1547,
+      "phone": "+852 2100 0101",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 2,
+      "name": "周星星五金灣仔",
+      "region": "香港島",
+      "district": "灣仔",
+      "address": "灣仔軒尼詩道123號地下",
+      "latitude": 22.2778,
+      "longitude": 114.1724,
+      "phone": "+852 2100 0102",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 3,
+      "name": "周星星五金銅鑼灣",
+      "region": "香港島",
+      "district": "銅鑼灣",
+      "address": "銅鑼灣謝斐道488號3號舖",
+      "latitude": 22.2807,
+      "longitude": 114.1839,
+      "phone": "+852 2100 0103",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 4,
+      "name": "周星星五金北角",
+      "region": "香港島",
+      "district": "北角",
+      "address": "北角英皇道233號2號舖",
+      "latitude": 22.2912,
+      "longitude": 114.1976,
+      "phone": "+852 2100 0104",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 5,
+      "name": "周星星五金鰂魚涌",
+      "region": "香港島",
+      "district": "鰂魚涌",
+      "address": "鰂魚涌英皇道1010號12號舖",
+      "latitude": 22.2841,
+      "longitude": 114.2135,
+      "phone": "+852 2100 0105",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 6,
+      "name": "周星星五金太古",
+      "region": "香港島",
+      "district": "太古",
+      "address": "太古康怡廣場南座G23號舖",
+      "latitude": 22.2772,
+      "longitude": 114.2171,
+      "phone": "+852 2100 0106",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 7,
+      "name": "周星星五金旺角",
+      "region": "九龍",
+      "district": "旺角",
+      "address": "旺角彌敦道610號地下",
+      "latitude": 22.3174,
+      "longitude": 114.1702,
+      "phone": "+852 2100 0107",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 8,
+      "name": "周星星五金尖沙咀",
+      "region": "九龍",
+      "district": "尖沙咀",
+      "address": "尖沙咀廣東道30號新港中心1號舖",
+      "latitude": 22.2978,
+      "longitude": 114.1729,
+      "phone": "+852 2100 0108",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 9,
+      "name": "周星星五金油麻地",
+      "region": "九龍",
+      "district": "油麻地",
+      "address": "油麻地上海街388號地下",
+      "latitude": 22.3125,
+      "longitude": 114.1706,
+      "phone": "+852 2100 0109",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 10,
+      "name": "周星星五金佐敦",
+      "region": "九龍",
+      "district": "佐敦",
+      "address": "佐敦彌敦道223號1號舖",
+      "latitude": 22.3041,
+      "longitude": 114.1718,
+      "phone": "+852 2100 0110",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 11,
+      "name": "周星星五金深水埗",
+      "region": "九龍",
+      "district": "深水埗",
+      "address": "深水埗福華街123號地下",
+      "latitude": 22.3302,
+      "longitude": 114.1627,
+      "phone": "+852 2100 0111",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 12,
+      "name": "周星星五金九龍城",
+      "region": "九龍",
+      "district": "九龍城",
+      "address": "九龍城太子道西188號2號舖",
+      "latitude": 22.3239,
+      "longitude": 114.1872,
+      "phone": "+852 2100 0112",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 13,
+      "name": "周星星五金觀塘",
+      "region": "九龍",
+      "district": "觀塘",
+      "address": "觀塘開源道55號創紀之城1期G18號舖",
+      "latitude": 22.3122,
+      "longitude": 114.2256,
+      "phone": "+852 2100 0113",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 14,
+      "name": "周星星五金荃灣",
+      "region": "新界",
+      "district": "荃灣",
+      "address": "荃灣大河道100號荃新天地2期G12號舖",
+      "latitude": 22.3687,
+      "longitude": 114.1189,
+      "phone": "+852 2100 0114",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 15,
+      "name": "周星星五金沙田",
+      "region": "新界",
+      "district": "沙田",
+      "address": "沙田新城市廣場3期A108號舖",
+      "latitude": 22.3814,
+      "longitude": 114.1889,
+      "phone": "+852 2100 0115",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 16,
+      "name": "周星星五金大埔",
+      "region": "新界",
+      "district": "大埔",
+      "address": "大埔安邦路9號大埔廣場G1號舖",
+      "latitude": 22.4503,
+      "longitude": 114.1684,
+      "phone": "+852 2100 0116",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 17,
+      "name": "周星星五金屯門",
+      "region": "新界",
+      "district": "屯門",
+      "address": "屯門屯利街1號屯門市廣場1期G23號舖",
+      "latitude": 22.3936,
+      "longitude": 113.9753,
+      "phone": "+852 2100 0117",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 18,
+      "name": "周星星五金元朗",
+      "region": "新界",
+      "district": "元朗",
+      "address": "元朗教育路1號YOHO MALL形點G32號舖",
+      "latitude": 22.4445,
+      "longitude": 114.0351,
+      "phone": "+852 2100 0118",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 19,
+      "name": "周星星五金天水圍",
+      "region": "新界",
+      "district": "天水圍",
+      "address": "天水圍天恩路12號嘉湖新城G15號舖",
+      "latitude": 22.4578,
+      "longitude": 114.0019,
+      "phone": "+852 2100 0119",
+      "opening_hours": "10:00-22:00"
+    },
+    {
+      "store_id": 20,
+      "name": "周星星五金將軍澳",
+      "region": "新界",
+      "district": "將軍澳",
+      "address": "將軍澳唐德街1號將軍澳中心G10號舖",
+      "latitude": 22.3076,
+      "longitude": 114.2589,
+      "phone": "+852 2100 0120",
+      "opening_hours": "10:00-22:00"
+    }
+]
