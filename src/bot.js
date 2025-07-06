@@ -7,17 +7,8 @@ dotenv.config();
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 export function startBot() {
-  // bot.onText(/\/start/, async (msg, match) => {
-  //   let chatId = msg.chat.id;
-  //   let resp = `✨✨歡迎使用 周星星五金電器鋪查詢系統，點擊以下快捷指令快速獲得本店資訊。\n 🌈 /search 如何搜尋商品 \n 🌈 /questionhelp 店鋪Q&A\n 🌈 /shop 全部店鋪 \n 🌈 /news 最新推介產品`
-  //   bot.sendMessage(chatId, resp);
-  // })
-
-
-
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
-    console.log('收到 /start，chatId:', chatId);
     const opts = {
       reply_markup: {
         inline_keyboard: [
@@ -110,15 +101,14 @@ export function startBot() {
 
       let result = shopJSON.data.filter((shop) => {
         coords2 = { latitude: shop.latitude, longitude: shop.longitude };
-        //console.log(havesineDistance(coords1, coords2));
-        return havesineDistance(coords1, coords2) <= 4;//<=2 km
+        return havesineDistance(coords1, coords2) <= 2;//<=2 km
       })
 
-      if (result.length > 0){
-         bot.sendMessage(fromId, "以下為指定地點附近的店鋪：(<=2KM)");
-          printoutShop(result, bot, fromId, resp);
+      if (result.length > 0) {
+        bot.sendMessage(fromId, "以下為指定地點附近的店鋪：(<=2KM)");
+        printoutShop(result, bot, fromId, resp);
       }
-       
+
       else
         bot.sendMessage(fromId, "你的附近兩公里内沒有我們的店鋪。");
 
@@ -127,27 +117,35 @@ export function startBot() {
     }
   });
 
-  const TIPS_MESSAGE = "😇提示：查詢物品格式為\n輸入/search <物品名稱> [最低價] [最高價]\n如/search makita 800 2000";
-
-  const sendTips = (bot, chatId, extraMessage = "") => {
+  const TIPS_SEARCH = "😇提示：查詢物品格式為\n輸入/search <物品名稱> [最低價] [最高價]\n如/search makita 800 2000";
+  const TIPS_QUESTIONS = "提示：查詢物品格式為\n輸入/question <關鍵字> \n如/question 保養";
+  
+  const sendTips = (bot, chatId, extraMessage = "",TIPS_MESSAGE= "") => {
     bot.sendMessage(chatId, `${extraMessage ? `\n 結果: ${extraMessage}\n` : ""}${TIPS_MESSAGE}`);
   };
 
-  function printout(court, bot, fromId, resp) {
+  function printoutQA(court, bot, fromId, resp) {
     court.forEach(async item => {
-      resp += `📍名稱: <b>${item.name}\n`;
+      resp += `📍問題: ${item.question}\n`;
+      resp += `🌟答案: ${item.answer}\n`;
+      bot.sendMessage(fromId, resp);
+      resp = "";
+    });
+  }
+
+  function printoutProduct(court, bot, fromId, resp) {
+    court.forEach(async item => {
+      resp += `📍名稱: ${item.name}\n`;
       resp += `🌟型號: ${item.model}\n`;
       resp += `🎉價格: HKD ${item.price_hkd}\n`;
       resp += `💸${item.description}\n`;
       resp += `✨類型 : ${item.category_type}\n`;
-      //console.log(resp);
       bot.sendMessage(fromId, resp);
       resp = "";
     });
   }
 
   function printoutShop(court, bot, fromId, resp) {
-   
     court.forEach(async item => {
       resp += `📍店鋪: ${item.name}\n`;
       resp += `🌟地址: ${item.address}\n`;
@@ -157,6 +155,31 @@ export function startBot() {
       resp = "";
     });
   }
+  bot.onText(/\/question(?:\s+(\S+))?/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const input = match[1]?.trim();
+    if (!input) {
+      return sendTips(bot, chatId, "🙅‍♀️請輸入問題關鍵詞",TIPS_QUESTIONS);
+    }
+     try {
+        let resp = "";
+        let fixinput = input.replace(/\s+/, "").toLowerCase();
+        let productJSON = await getJSON("http://localhost:8080/questionAll");
+        let result = productJSON.data.filter((data) => {
+          return (data.question.replace(/\s+/, "").toLowerCase().indexOf(fixinput) != -1);
+        })
+        if (result.length > 0) {
+          printoutQA(result, bot, chatId, resp);
+          return;
+        }
+        else
+          return sendTips(bot, chatId, "🙅‍♀️找不到相關資料",TIPS_QUESTIONS);
+
+      } catch (error) {
+        console.log("question wrong->", error)
+      }
+  })
+
 
   bot.onText(/\/search(?:\s+(.+))?/, async (msg, match) => {
     const chatId = msg.chat.id;
@@ -165,13 +188,11 @@ export function startBot() {
     if (!input) {
       return sendTips(bot, chatId, "🙅‍♀️請輸入物品名稱");
     }
-    // const aaa = ["1","2","33"]
     const [keyword, minPriceStr, maxPriceStr] = input.split(/\s+/);
-    // console.log("---->",minPriceStr,maxPriceStr)
     if (minPriceStr || maxPriceStr) {
       const minPrice = parseInt(minPriceStr, 10);
       const maxPrice = parseInt(maxPriceStr, 10);
-      
+
       if (Number.isNaN(minPrice) || minPrice < 0) {
         return sendTips(bot, chatId, "🙅‍♀️最低價必須為正整數");
       }
@@ -190,15 +211,15 @@ export function startBot() {
           return (data.name.replace(/\s+/, "").toLowerCase().indexOf(input) != -1) && (data.price_hkd >= minPrice && data.price_hkd <= maxPrice);
         })
         if (result.length > 0) {
-          printout(result, bot, chatId, resp);
+          printoutProduct(result, bot, chatId, resp);
           return;
         }
         else
-          return sendTips(bot, chatId, "🙅‍♀️找不到相關資料.");
+          return sendTips(bot, chatId, "🙅‍♀️找不到相關資料");
 
 
       } catch (error) {
-        console.log("search worong->", error)
+        console.log("search wrong->", error)
       }
     }
     else if (!minPriceStr && !maxPriceStr) {//just name
@@ -211,7 +232,7 @@ export function startBot() {
         })
 
         if (result.length > 0) {
-          printout(result, bot, chatId, resp);
+          printoutProduct(result, bot, chatId, resp);
           return;
         }
         else
@@ -224,67 +245,6 @@ export function startBot() {
     }
 
   });
-
-
-  // bot.onText(/\/search/, async (msg, match) => {
-  //   const chatId = msg.chat.id;
-  //   const string = msg.text;
-  //   const array = string.split(' ');
-  //   let goto = 0;
-  //   if (array.length - 1 == 3) {
-  //     if (parseInt(array[2]) > 0 && parseInt(array[3]) > 0 && parseInt(array[2]) <= parseInt(array[3])) {
-  //       goto = 3;
-  //       bot.sendMessage(chatId, `查詢keyword:=${array[1]}, 最低價=${array[2]}, 最高價=${array[3]}`);
-  //     }
-  //     else
-  //       bot.sendMessage(msg.chat.id, "tips:查詢物品格式為\n輸入/search (物品名稱) (最低價*如需要) (最高價*如需要) 例/search makita 800 2000")
-  //   } else if (array.length - 1 == 2) {
-  //     if (parseInt(array[2]) > 0) {
-  //       goto = 2;
-  //       bot.sendMessage(chatId, `查詢keyword:=${array[1]}, 最低價=${array[2]}`);
-  //     } else
-  //       bot.sendMessage(msg.chat.id, "tips:查詢物品格式為\n輸入/search (物品名稱) (最低價*如需要) (最高價*如需要) 例/search makita 800 2000")
-  //   } else if (array.length - 1 == 1) {
-  //     goto = 1;
-  //     bot.sendMessage(chatId, `查詢keyword:=${array[1]}}`);
-  //   }
-  //   else {
-  //     bot.sendMessage(msg.chat.id, "tips:查詢物品格式為\n輸入/search (物品名稱) (最低價*如需要) (最高價*如需要) 例/search makita 800 2000")
-  //   }
-  //   if (goto) {
-  //     try {
-  //       let resp = "";
-  //       let input = array[1].replace(/\s+/, "").toLowerCase();//del space
-  //       let courtJSON = await getJSON("http://localhost:8080/product");
-  //       let result = courtJSON.data.filter((court) => {
-  //         return court.name.replace(/\s+/, "").toLowerCase().indexOf(input) != -1;
-
-  //       })
-  //       //console.log(result);
-  //       printout(result, bot, fromId, resp);
-
-  //     } catch (error) {
-  //       console.log("search worong->", error)
-  //     }
-  //   }
-  // });
-
-
-  // bot.onText(/\/search (.+) (.+) (.+)/, async (msg, match) => {
-  //   const chatId = msg.chat.id;
-  //   const itemName = match[1];
-  //   const minPrize = match[2];
-  //   const maxPrize = match[3];
-  //   console.log(itemName,minPrize,maxPrize);
-  //       ////
-  // });
-
-  // bot.onText(/\/addproduct (.+) (.+)/, async (msg, match) => {
-  //   const chatId = msg.chat.id;
-  //   const userId = match[1];
-  //   const name = match[2];
-  //    ////
-  // });
 
   console.log('Telegram Bot is running');
 }
