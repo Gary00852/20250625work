@@ -1,7 +1,18 @@
 import express from 'express';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { readJSONfile, writeJSONfile, getJSON } from './db.js';
-const router = express.Router();
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const productPath = path.join(__dirname, 'product.json');
+const shopPath = path.join(__dirname, 'shop.json');
+const QAPath = path.join(__dirname, 'q&a.json');
+
+const router = express.Router();
 
 router.use((err, req, res, next) => {
     if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -10,23 +21,81 @@ router.use((err, req, res, next) => {
     next(err);
 })
 
-const productPath = "./src/product.json";
-const shopPath = "./src/shop.json";
-const QAPath = "./src/q&a.json";
+//login adminList
+//password = abcdeee
+const users = [
+    { "id": "1", "username": "sssssssuperUser", "password": "$2a$12$gXv3BT1izWLzlBQPTdpXB.w11JHPjw3MKhrSD7s8Yt0F8gwYuOzR6" }
+]
 
-//1.find all product done
+const authenticate = (req, res, next) => {
+    const { username, password } = req.body;
+    const user = users.find(u => u.username === username);
+    if (user && bcrypt.compareSync(password, user.password))
+    {
+        req.user = { "id": user.id, "username": user.username };
+        next();
+    }else{
+        res.status(400).json({ "err": "input wrong!! user or password!" });
+    }
+}
+
+const authorize = (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;//the bearer and token
+        if (authHeader === undefined || authHeader === null) {
+            return res.sendStatus(401);
+        }
+        const token = authHeader.split(" ")[1];
+        if (token == null)
+            return res.sendStatus(401);
+
+        jwt.verify(token, "secret_key", (err, userobj) => {
+            if (err)
+                return res.sendStatus(403);
+
+            req.user = userobj;
+            next();
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+//show all product done
 router.get("/productAll", async (req, res) => {
     try {
         let readfile = await readJSONfile(productPath);
         res.end(readfile);
-        // console.log(readfile);
     } catch (error) {
-        console.log("Error cathed:Get courts fail.");
+        console.log("Error cathed:Get productJSON fail.");
         console.log(error);
     }
 })
 
-//2.find product by id done
+//show all shop done
+router.get("/shopAll", async (req, res) => {
+    try {
+        let readfile = await readJSONfile(shopPath);
+        res.end(readfile);
+    } catch (error) {
+        console.log("Error cathed:Get shopJSON fail.");
+        console.log(error);
+    }
+})
+
+
+//show all qna done
+router.get("/questionAll", async (req, res) => {
+    try {
+        let readfile = await readJSONfile(QAPath);
+        res.end(readfile);
+    } catch (error) {
+        console.log("Error cathed:Get QAJSON fail.");
+        console.log(error);
+    }
+})
+
+//find product by id done
 router.get("/product/:pid", async (req, res) => {
     try {
         let readfile = await readJSONfile(productPath);
@@ -38,129 +107,183 @@ router.get("/product/:pid", async (req, res) => {
     }
 })
 
-//3.use body add (need admin )
-router.post("/addproduct", async (req, res) => {
+//about product CRUD
+//addproduct (need authorize ) done
+router.post("/addproduct", authorize, async (req, res) => {
     try {
         let readfile = await readJSONfile(productPath);
         let jsonOBJ = JSON.parse(readfile);
         let inputData = req.body;
         jsonOBJ.push(inputData);
-        // console.log(jsonOBJ);
         await writeJSONfile(productPath, JSON.stringify(jsonOBJ));
         res.status(201).send(JSON.stringify(jsonOBJ));
     } catch (error) {
-        productPath
-        res.status(400), json({ "err": "Error catched:Add court fail" });
-        console.log("Error catched:Add court fail.")
+        res.status(400).json({ "err": "Error catched:Add product fail" });
+        console.log("Error catched:Add product fail.")
         console.log(error);
     }
 })
 
-//4.update by id (need admin)
-router.put("/editproduct/:pid", async (req, res) => {
+//updateproduct by id (need authorize) done
+router.put("/editproduct/:pid", authorize,async (req, res) => {
     try {
         let readFile = await readJSONfile(productPath);
         let jsonOBJ = JSON.parse(readFile);
-        let courtOBJidx = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
-        let inputData = req.body;
-        if (courtOBJidx != -1) {
-            jsonOBJ[courtOBJidx] = inputData;
-            console.log(jsonOBJ);
+        let findObj = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        let inputData = req.body;//new obj per
+        if (findObj != -1) {
+            jsonOBJ[findObj] = inputData;
             await writeJSONfile(productPath, JSON.stringify(jsonOBJ));
             res.status(201).send(JSON.stringify(jsonOBJ));
         }
         else
-            throw new Error("Error catched:Edit court fail.")
+            res.status(400).json({ "err": "Edit product fail" });
     }
     catch (error) {
-        res.status(400).json({ "Error": "Error Catched:Edit court fail." })
-        console.log("Error catched:Edit court fail");
+        res.status(400).json({ "Error": "Error Catched:Edit product fail." })
+        console.log("Error catched:Edit product fail");
         console.log(error);
     }
 })
 
-
-
-//5.delete by id (need admin)
-router.delete("/delproduct/:pid", async (req, res) => {
+//deleteproduct by id (need authorize) done
+router.delete("/delproduct/:pid", authorize,async (req, res) => {
     try {
         let readfile = await readJSONfile(productPath)
         let jsonOBJ = JSON.parse(readfile);
-        // console.log()
-        let courtIdx = jsonOBJ.findIndex((court) => court.product_id == req.params.pid);
-        if (courtIdx != -1) {
-            jsonOBJ.splice(courtIdx, 1);
+        let itemIndex = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        if (itemIndex != -1) {
+            
+            jsonOBJ.splice(itemIndex, 1);
             await writeJSONfile(productPath, JSON.stringify(jsonOBJ))
             res.end(JSON.stringify(jsonOBJ));
-            console.log(JSON.stringify(jsonOBJ));
         } else {
-            throw new Error("Error catched.Invalid court id.")
+            res.status(400).json({ "err": "Invalid product id" });
         }
     } catch (error) {
-        console.log("Error catched:Delete court fail.")
+        console.log("Error catched:Delete product fail.")
         console.log(error)
     }
 })
 
-router.get("/SHOP", async (req, res) => {
+//about shop CRUD
+//add (need authorize ) done
+router.post("/addshop", authorize, async (req, res) => {
     try {
         let readfile = await readJSONfile(shopPath);
-        res.end(readfile);
-        // console.log(readfile);
+        let jsonOBJ = JSON.parse(readfile);
+        let inputData = req.body;
+        jsonOBJ.push(inputData);
+        await writeJSONfile(shopPath, JSON.stringify(jsonOBJ));
+        res.status(201).send(JSON.stringify(jsonOBJ));
     } catch (error) {
-        console.log("Error cathed:Get shopJSON fail.");
+        res.status(400).json({ "err": "Error catched:Add shop fail" });
         console.log(error);
     }
 })
 
+//update by id (need authorize) done
+router.put("/editshop/:pid", authorize,async (req, res) => {
+    try {
+        let readFile = await readJSONfile(shopPath);
+        let jsonOBJ = JSON.parse(readFile);
+        let findObj = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        let inputData = req.body;//new obj per
+        if (findObj != -1) {
+            jsonOBJ[findObj] = inputData;
+            await writeJSONfile(shopPath, JSON.stringify(jsonOBJ));
+            res.status(201).send(JSON.stringify(jsonOBJ));
+        }
+        else
+            res.status(400).json({ "err": "Edit shop fail" });
+    }
+    catch (error) {
+        res.status(400).json({ "Error": "Error Catched:Edit shop fail." })
+        console.log(error);
+    }
+})
+
+//delete by id (need authorize) done
+router.delete("/delshop/:pid", authorize,async (req, res) => {
+    try {
+        let readfile = await readJSONfile(shopPath)
+        let jsonOBJ = JSON.parse(readfile);
+        let itemIndex = jsonOBJ.findIndex((item) => item.id == req.params.pid);
+        if (itemIndex != -1) {
+            
+            jsonOBJ.splice(itemIndex, 1);
+            await writeJSONfile(shopPath, JSON.stringify(jsonOBJ))
+            res.end(JSON.stringify(jsonOBJ));
+        } else {
+            res.status(400).json({ "err": "Invalid shop id" });
+        }
+    } catch (error) {
+        console.log("Error catched:Delete shop fail.")
+        console.log(error)
+    }
+})
+
+
+//about shop CRUD
+//add (need authorize ) done
+router.post("/addqa", authorize, async (req, res) => {
+    try {
+        let readfile = await readJSONfile(QAPath);
+        let jsonOBJ = JSON.parse(readfile);
+        let inputData = req.body;
+        jsonOBJ.push(inputData);
+        await writeJSONfile(QAPath, JSON.stringify(jsonOBJ));
+        res.status(201).send(JSON.stringify(jsonOBJ));
+    } catch (error) {
+        res.status(400).json({ "err": "Error catched:Add shop fail" });
+        console.log(error);
+    }
+})
+
+//update by id (need authorize) done
+router.put("/editqa/:pid", authorize,async (req, res) => {
+    try {
+        let readFile = await readJSONfile(QAPath);
+        let jsonOBJ = JSON.parse(readFile);
+        let findObj = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        let inputData = req.body;//new obj per
+        if (findObj != -1) {
+            jsonOBJ[findObj] = inputData;
+            await writeJSONfile(QAPath, JSON.stringify(jsonOBJ));
+            res.status(201).send(JSON.stringify(jsonOBJ));
+        }
+        else
+            res.status(400).json({ "err": "Edit shop fail" });
+    }
+    catch (error) {
+        res.status(400).json({ "Error": "Error Catched:Edit shop fail." })
+        console.log(error);
+    }
+})
+
+//delete by id (need authorize) done
+router.delete("/delqa/:pid", authorize,async (req, res) => {
+    try {
+        let readfile = await readJSONfile(QAPath)
+        let jsonOBJ = JSON.parse(readfile);
+        let itemIndex = jsonOBJ.findIndex((item) => item.id == req.params.pid);
+        if (itemIndex != -1) {
+            
+            jsonOBJ.splice(itemIndex, 1);
+            await writeJSONfile(QAPath, JSON.stringify(jsonOBJ))
+            res.end(JSON.stringify(jsonOBJ));
+        } else {
+            res.status(400).json({ "err": "Invalid shop id" });
+        }
+    } catch (error) {
+        console.log("Error catched:Delete shop fail.")
+        console.log(error)
+    }
+})
+
+router.post("/login", authenticate, (req, res) => {
+    const token = jwt.sign(req.user, "secret_key", { "expiresIn": "1h" })
+    res.json({ token });
+})
+
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import express from 'express';
-// import { getUser, addUser } from './db.js';
-// const router = express.Router();
-
-// router.get('/user/:id', async (req, res) => {
-//   try {
-//     const user = await getUser(req.params.id);
-//     if (user) {
-//       res.json(user);
-//     } else {
-//       res.status(404).json({ error: 'User not found' });
-//     }
-//   } catch (err) {
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// });
-
-// router.post('/user', async (req, res) => {
-//   try {
-//     const { id, name } = req.body;
-//     const result = await addUser({ id, name });
-//     res.json({ message: 'User added', insertedId: result.insertedId });
-//   } catch (err) {
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// });
-
-// export default router;
