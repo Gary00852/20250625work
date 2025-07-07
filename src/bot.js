@@ -97,7 +97,7 @@ export function startBot() {
       };
       console.log(coords1.latitude, coords1.longitude)
       let coords2 = { latitude: 34.522, longitude: -118.2437 };
-      let shopJSON = await getJSON('http://localhost:8080/shop');
+      let shopJSON = await getJSON(`http://localhost:${process.env.SERVER_PORT}/shop`);
 
       let result = shopJSON.data.filter((shop) => {
         coords2 = { latitude: shop.latitude, longitude: shop.longitude };
@@ -164,7 +164,7 @@ export function startBot() {
      try {
         let resp = "";
         let fixinput = input.replace(/\s+/, "").toLowerCase();
-        let productJSON = await getJSON("http://localhost:8080/questionAll");
+        let productJSON = await getJSON(`http://localhost:${process.env.SERVER_PORT}/questionAll`);
         let result = productJSON.data.filter((data) => {
           return (data.question.replace(/\s+/, "").toLowerCase().indexOf(fixinput) != -1);
         })
@@ -186,7 +186,7 @@ export function startBot() {
     const input = match[1]?.trim();
 
     if (!input) {
-      return sendTips(bot, chatId, "🙅‍♀️請輸入物品名稱");
+      return sendTips(bot, chatId, "🙅‍♀️請輸入物品名稱",TIPS_SEARCH);
     }
     const [keyword, minPriceStr, maxPriceStr] = input.split(/\s+/);
     if (minPriceStr || maxPriceStr) {
@@ -194,19 +194,19 @@ export function startBot() {
       const maxPrice = parseInt(maxPriceStr, 10);
 
       if (Number.isNaN(minPrice) || minPrice < 0) {
-        return sendTips(bot, chatId, "🙅‍♀️最低價必須為正整數");
+        return sendTips(bot, chatId, "🙅‍♀️最低價必須為正整數",TIPS_SEARCH);
       }
       if (Number.isNaN(maxPrice) || maxPrice < 0) {
-        return sendTips(bot, chatId, "🙅‍♀️最高價必須為正整數");
+        return sendTips(bot, chatId, "🙅‍♀️最高價必須為正整數",TIPS_SEARCH);
       }
       if (maxPrice < minPrice) {
-        return sendTips(bot, chatId, "🙅‍♀️最高價不能小於最低價");
+        return sendTips(bot, chatId, "🙅‍♀️最高價不能小於最低價",TIPS_SEARCH);
       }
 
       try {
         let resp = "";
         let input = keyword.replace(/\s+/, "").toLowerCase();
-        let productJSON = await getJSON("http://localhost:8080/productAll");
+        let productJSON = await getJSON(`http://localhost:${process.env.SERVER_PORT}/productAll`);
         let result = productJSON.data.filter((data) => {
           return (data.name.replace(/\s+/, "").toLowerCase().indexOf(input) != -1) && (data.price_hkd >= minPrice && data.price_hkd <= maxPrice);
         })
@@ -215,18 +215,18 @@ export function startBot() {
           return;
         }
         else
-          return sendTips(bot, chatId, "🙅‍♀️找不到相關資料");
+          return sendTips(bot, chatId, "🙅‍♀️找不到相關資料",TIPS_SEARCH);
 
 
       } catch (error) {
-        console.log("search wrong->", error)
+        console.log("search wrong :", error)
       }
     }
     else if (!minPriceStr && !maxPriceStr) {//just name
       try {
         let resp = "";
         let input = keyword.replace(/\s+/, "").toLowerCase();
-        let productJSON = await getJSON("http://localhost:8080/productAll");
+        let productJSON = await getJSON(`http://localhost:${process.env.SERVER_PORT}/productAll`);
         let result = productJSON.data.filter((data) => {
           return data.name.replace(/\s+/, "").toLowerCase().indexOf(input) != -1;
         })
@@ -236,11 +236,11 @@ export function startBot() {
           return;
         }
         else
-          return sendTips(bot, chatId, "🙅‍♀️找不到相關資料.");
+          return sendTips(bot, chatId, "🙅‍♀️找不到相關資料.",TIPS_SEARCH);
 
 
       } catch (error) {
-        console.log("search worong->", error)
+        console.log("search worong :", error)
       }
     }
 
