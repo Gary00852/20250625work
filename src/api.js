@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const productPath = path.join(__dirname, 'product.json');
 const shopPath = path.join(__dirname, 'shop.json');
-const QAPath = path.join(__dirname, 'q&a.json');
+const QAPath = path.join(__dirname, 'question.json');
 
 const router = express.Router();
 
