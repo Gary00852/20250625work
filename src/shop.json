@@ -1,6 +1,6 @@
 [
     {
-      "store_id": 1,
+      "id": 1,
       "name": "周星星五金中環",
       "region": "香港島",
       "district": "中環",
@@ -11,7 +11,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 2,
+      "id": 2,
       "name": "周星星五金灣仔",
       "region": "香港島",
       "district": "灣仔",
@@ -22,7 +22,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 3,
+      "id": 3,
       "name": "周星星五金銅鑼灣",
       "region": "香港島",
       "district": "銅鑼灣",
@@ -33,7 +33,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 4,
+      "id": 4,
       "name": "周星星五金北角",
       "region": "香港島",
       "district": "北角",
@@ -44,7 +44,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 5,
+      "id": 5,
       "name": "周星星五金鰂魚涌",
       "region": "香港島",
       "district": "鰂魚涌",
@@ -55,7 +55,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 6,
+      "id": 6,
       "name": "周星星五金太古",
       "region": "香港島",
       "district": "太古",
@@ -66,7 +66,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 7,
+      "id": 7,
       "name": "周星星五金旺角",
       "region": "九龍",
       "district": "旺角",
@@ -77,7 +77,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 8,
+      "id": 8,
       "name": "周星星五金尖沙咀",
       "region": "九龍",
       "district": "尖沙咀",
@@ -88,7 +88,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 9,
+      "id": 9,
       "name": "周星星五金油麻地",
       "region": "九龍",
       "district": "油麻地",
@@ -99,7 +99,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 10,
+      "id": 10,
       "name": "周星星五金佐敦",
       "region": "九龍",
       "district": "佐敦",
@@ -110,7 +110,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 11,
+      "id": 11,
       "name": "周星星五金深水埗",
       "region": "九龍",
       "district": "深水埗",
@@ -121,7 +121,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 12,
+      "id": 12,
       "name": "周星星五金九龍城",
       "region": "九龍",
       "district": "九龍城",
@@ -132,7 +132,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 13,
+      "id": 13,
       "name": "周星星五金觀塘",
       "region": "九龍",
       "district": "觀塘",
@@ -143,7 +143,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 14,
+      "id": 14,
       "name": "周星星五金荃灣",
       "region": "新界",
       "district": "荃灣",
@@ -154,7 +154,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 15,
+      "id": 15,
       "name": "周星星五金沙田",
       "region": "新界",
       "district": "沙田",
@@ -165,7 +165,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 16,
+      "id": 16,
       "name": "周星星五金大埔",
       "region": "新界",
       "district": "大埔",
@@ -176,7 +176,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 17,
+      "id": 17,
       "name": "周星星五金屯門",
       "region": "新界",
       "district": "屯門",
@@ -187,7 +187,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 18,
+      "id": 18,
       "name": "周星星五金元朗",
       "region": "新界",
       "district": "元朗",
@@ -198,7 +198,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 19,
+      "id": 19,
       "name": "周星星五金天水圍",
       "region": "新界",
       "district": "天水圍",
@@ -209,7 +209,7 @@
       "opening_hours": "10:00-22:00"
     },
     {
-      "store_id": 20,
+      "id": 20,
       "name": "周星星五金將軍澳",
       "region": "新界",
       "district": "將軍澳",
