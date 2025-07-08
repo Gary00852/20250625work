@@ -99,7 +99,7 @@ router.get("/questionAll", async (req, res) => {
 router.get("/product/:pid", async (req, res) => {
     try {
         let readfile = await readJSONfile(productPath);
-        let jsonOBJ = JSON.parse(readfile).filter((item) => item.product_id == req.params.pid)
+        let jsonOBJ = JSON.parse(readfile).filter((item) => item.id == req.params.pid)
         res.end(JSON.stringify(jsonOBJ));
     } catch (error) {
         console.log("Error catched:Get court fail.");
@@ -129,7 +129,7 @@ router.put("/editproduct/:pid", authorize,async (req, res) => {
     try {
         let readFile = await readJSONfile(productPath);
         let jsonOBJ = JSON.parse(readFile);
-        let findObj = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        let findObj = jsonOBJ.findIndex((item) => item.id == req.params.pid);
         let inputData = req.body;//new obj per
         if (findObj != -1) {
             jsonOBJ[findObj] = inputData;
@@ -151,7 +151,7 @@ router.delete("/delproduct/:pid", authorize,async (req, res) => {
     try {
         let readfile = await readJSONfile(productPath)
         let jsonOBJ = JSON.parse(readfile);
-        let itemIndex = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        let itemIndex = jsonOBJ.findIndex((item) => item.id == req.params.pid);
         if (itemIndex != -1) {
             
             jsonOBJ.splice(itemIndex, 1);
@@ -187,7 +187,7 @@ router.put("/editshop/:pid", authorize,async (req, res) => {
     try {
         let readFile = await readJSONfile(shopPath);
         let jsonOBJ = JSON.parse(readFile);
-        let findObj = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        let findObj = jsonOBJ.findIndex((item) => item.id == req.params.pid);
         let inputData = req.body;//new obj per
         if (findObj != -1) {
             jsonOBJ[findObj] = inputData;
@@ -245,7 +245,7 @@ router.put("/editqa/:pid", authorize,async (req, res) => {
     try {
         let readFile = await readJSONfile(QAPath);
         let jsonOBJ = JSON.parse(readFile);
-        let findObj = jsonOBJ.findIndex((item) => item.product_id == req.params.pid);
+        let findObj = jsonOBJ.findIndex((item) => item.id == req.params.pid);
         let inputData = req.body;//new obj per
         if (findObj != -1) {
             jsonOBJ[findObj] = inputData;
