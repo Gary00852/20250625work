@@ -6,7 +6,7 @@
     "model": "GSB 18V-55",
     "description": "18V無刷電鑽, 配備LED燈, 雙速調節, 適合木材及金屬鑽孔。高效無刷馬達提供更長使用壽命, 扭力設定精準, 附帶人體工學握把, 操作舒適, 適合專業與家庭使用。",
     "price_hkd": 1299.00,
-    "category_type": "電鑽",
+    "category_type": 1,
     "hot": 0
   },
   {
@@ -136,7 +136,7 @@
     "model": "DWE6423",
     "description": "125mm軌道式砂光機, 適用於木材及金屬表面處理。低振動設計減少操作疲勞, 配備高效集塵系統, 確保平滑表面處理, 適合家具製作及裝修。",
     "price_hkd": 799.00,
-    "category_type": 2,
+    "category_type": 3,
     "hot": 0
   },
   {
@@ -146,7 +146,7 @@
     "model": "RT0700CX2",
     "description": "710W電木銑, 適用於木材雕刻及邊緣修整。配備可調速控制及精準深度調整, 適合木工精細作業, 附多款配件, 提升多功能性與靈活性。",
     "price_hkd": 1199.00,
-    "category_type": 2,
+    "category_type": 3,
     "hot": 0
   },
   {
@@ -155,7 +155,7 @@
     "brand": "Milwaukee",
     "model": "M18 FCOS230",
     "description": "230mm電動切割機, 適用於金屬及混凝土切割。配備高性能無刷馬達, 提供強大切割力, 附帶安全護罩及防塵設計, 適合重型工業應用。",
-    "price_hkd": 2799.00,
+    "16": 2799.00,
     "category_type": 2,
     "hot": 0
   },
@@ -166,7 +166,7 @@
     "model": "GHG 20-63",
     "description": "2000W電熱風槍, 溫度可調, 適用於除漆及熱縮。配備多段溫度與風量控制, 確保精準操作, 附帶多款噴嘴, 適合多種表面處理任務。",
     "price_hkd": 599.00,
-    "category_type": 3,
+    "category_type": 4,
     "hot": 0
   },
   {
@@ -196,7 +196,7 @@
     "model": "M12 FHS",
     "description": "12V充電式電鋸, 輕便設計, 適合快速木材切割。高效馬達提供穩定切割力, 配備快速刀片更換系統, 適合園藝及小型木材加工。",
     "price_hkd": 1399.00,
-    "category_type": 3,
+    "category_type": 2,
     "hot": 0
   },
   {
@@ -216,7 +216,7 @@
     "model": "DCG405N",
     "description": "125mm無刷角磨機, 配備電子離合器, 安全耐用。高效無刷馬達提供穩定動力, 適合金屬切割及打磨, 附帶防滑手柄, 提升操作舒適度。",
     "price_hkd": 1199.00,
-    "category_type": 3,
+    "category_type": 2,
     "hot": 0
   },
   {
@@ -226,7 +226,7 @@
     "model": "TW0350",
     "description": "400W電動衝擊扳手, 適合重型螺栓固定。提供高扭力輸出, 配備堅固外殼, 耐用性強, 適合機械維修及建築工地使用。",
     "price_hkd": 1499.00,
-    "category_type": 3,
+    "category_type": 1,
     "hot": 0
   },
   {
@@ -236,7 +236,7 @@
     "model": "M18 BHG",
     "description": "18V充電式熱風槍, 快速加熱, 適用於多種表面處理。配備多段溫度調節及LED燈, 適合除漆、熱縮及焊接作業, 輕便設計便於攜帶。",
     "price_hkd": 999.00,
-    "category_type": 3,
+    "category_type": 4,
     "hot": 0
   }
 ]
