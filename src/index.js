@@ -1,6 +1,6 @@
 import express from 'express';
 import apiRoutes from './api.js';
-//import { connectDB } from './db.js';
+import { connectDB } from './db.js';
 import { startBot } from './bot.js';
 import dotenv from 'dotenv';
 
@@ -11,10 +11,9 @@ app.use(express.json());
 app.use('/', apiRoutes);
 
 const port = process.env.SERVER_PORT || 8080;
-
 async function startApp() {
   try {
-    //await connectDB();
+    await connectDB(); //長開 MongoDB 連接
     startBot();
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);

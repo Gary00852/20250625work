@@ -1,7 +1,7 @@
 [
   {
     "no": 1,
-    "name": "Bosch 無刷電鑽",
+    "name": "Bosch無刷電鑽",
     "brand": "Bosch",
     "model": "GSB 18V-55",
     "description": "18V無刷電鑽, 配備LED燈, 雙速調節, 適合木材及金屬鑽孔。高效無刷馬達提供更長使用壽命, 扭力設定精準, 附帶人體工學握把, 操作舒適, 適合專業與家庭使用。",
@@ -11,7 +11,7 @@
   },
   {
     "no": 2,
-    "name": "DeWalt 充電式電批",
+    "name": "DeWalt充電式電批",
     "brand": "DeWalt",
     "model": "DCF887N",
     "description": "20V充電式衝擊螺絲批, 三段扭力控制, 含快速充電器。輕量化設計, 配備高性能無刷馬達, 提供強大扭力, 適合高強度螺絲固定任務, LED燈確保低光環境清晰作業。",
@@ -21,7 +21,7 @@
   },
   {
     "no": 3,
-    "name": "Makita 角鑽",
+    "name": "Makita角鑽",
     "brand": "Makita",
     "model": "DA333DZ",
     "description": "12V充電式角鑽, 適合狹窄空間鑽孔及螺絲固定。緊湊機身設計, 配備高精度齒輪系統, 提供穩定動力輸出, 適合木工及裝修工程, 電池續航力強, 操作靈活。",
@@ -31,7 +31,7 @@
   },
   {
     "no": 4,
-    "name": "Milwaukee 電錘",
+    "name": "Milwaukee電錘",
     "brand": "Milwaukee",
     "model": "M18 CHX",
     "description": "18V無刷電錘, 支援鑽孔、鑿擊及旋轉功能。強大衝擊力適合混凝土及磚牆作業, 配備防震手柄, 減少長期使用疲勞, 無刷技術確保高效能與耐用性。",
@@ -41,7 +41,7 @@
   },
   {
     "no": 5,
-    "name": "Bosch 衝擊扳手",
+    "name": "Bosch衝擊扳手",
     "brand": "Bosch",
     "model": "GDS 18V-400",
     "description": "18V衝擊扳手, 高扭力, 適用於重型螺栓固定。配備電子扭力控制系統, 確保精準操作, 堅固耐用的機身設計, 適合建築工地及機械維修等高負載環境。",
@@ -51,7 +51,7 @@
   },
   {
     "no": 6,
-    "name": "DeWalt 無刷電鑽套裝",
+    "name": "DeWalt無刷電鑽套裝",
     "brand": "DeWalt",
     "model": "DCD791P1",
     "description": "20V無刷電鑽, 配備5.0Ah電池, 適合連續作業。高效能無刷馬達, 雙速調節, 提供強大鑽孔與螺絲固定能力, 附帶便攜工具箱, 方便攜帶與收納。",
@@ -61,7 +61,7 @@
   },
   {
     "no": 7,
-    "name": "Makita 充電式螺絲批",
+    "name": "Makita充電式螺絲批",
     "brand": "Makita",
     "model": "DFS452Z",
     "description": "18V充電式螺絲批, 專為乾牆安裝設計。配備自動進料系統, 提升施工效率, 輕量化設計減少操作疲勞, 適合大規模乾牆及石膏板安裝工程。",
@@ -71,7 +71,7 @@
   },
   {
     "no": 8,
-    "name": "Milwaukee 電鑿",
+    "name": "Milwaukee電鑿",
     "brand": "Milwaukee",
     "model": "M12 CH",
     "description": "12V充電式電鑿, 輕便設計, 適合小型鑿擊任務。高效能馬達提供穩定衝擊力, 配備可調節鑿頭, 適合精細拆除及雕刻工作, 電池續航力佳, 方便攜帶。",
@@ -81,7 +81,7 @@
   },
   {
     "no": 9,
-    "name": "Bosch 角磨機",
+    "name": "Bosch角磨機",
     "brand": "Bosch",
     "model": "GWS 18V-10",
     "description": "125mm無刷角磨機, 適合金屬及石材切割與打磨。配備智能剎車系統, 提升安全性, 無刷馬達延長使用壽命, 附帶防塵設計, 適合惡劣環境作業。",
@@ -91,7 +91,7 @@
   },
   {
     "no": 10,
-    "name": "DeWalt 電圓鋸",
+    "name": "DeWalt電圓鋸",
     "brand": "DeWalt",
     "model": "DCS570N",
     "description": "184mm無刷電圓鋸, 配激光導引, 適合木材切割。高效能馬達提供平穩切割, 配備人體工學手柄, 減少震動, 適合木工及建築現場精準作業。",
@@ -101,7 +101,7 @@
   },
   {
     "no": 11,
-    "name": "Makita 雲石機",
+    "name": "Makita雲石機",
     "brand": "Makita",
     "model": "4100KB",
     "description": "110mm電動雲石機, 適用於瓷磚及石材切割。配備高效集塵系統, 保持工作環境清潔, 高轉速馬達確保快速精準切割, 適合裝修及石材加工。",
@@ -111,7 +111,7 @@
   },
   {
     "no": 12,
-    "name": "Milwaukee 振動鋸",
+    "name": "Milwaukee振動鋸",
     "brand": "Milwaukee",
     "model": "M18 FMT",
     "description": "18V多功能振動鋸, 適用於木材、金屬及塑料切割。快速更換刀片系統, 配備可調速控制, 適合多種材料精細作業, 輕便設計提升操作靈活性。",
@@ -121,7 +121,7 @@
   },
   {
     "no": 13,
-    "name": "Bosch 電動線鋸",
+    "name": "Bosch電動線鋸",
     "brand": "Bosch",
     "model": "GST 18V-LI",
     "description": "18V電動線鋸, 適合精細木材及塑料切割。配備四段擺動控制, 提升切割效率, 輕量化機身設計, 附帶LED燈, 適合複雜曲線切割任務。",
@@ -131,7 +131,7 @@
   },
   {
     "no": 14,
-    "name": "DeWalt 砂光機",
+    "name": "DeWalt砂光機",
     "brand": "DeWalt",
     "model": "DWE6423",
     "description": "125mm軌道式砂光機, 適用於木材及金屬表面處理。低振動設計減少操作疲勞, 配備高效集塵系統, 確保平滑表面處理, 適合家具製作及裝修。",
@@ -141,7 +141,7 @@
   },
   {
     "no": 15,
-    "name": "Makita 電木銑",
+    "name": "Makita電木銑",
     "brand": "Makita",
     "model": "RT0700CX2",
     "description": "710W電木銑, 適用於木材雕刻及邊緣修整。配備可調速控制及精準深度調整, 適合木工精細作業, 附多款配件, 提升多功能性與靈活性。",
@@ -151,7 +151,7 @@
   },
   {
     "no": 16,
-    "name": "Milwaukee 切割機",
+    "name": "Milwaukee切割機",
     "brand": "Milwaukee",
     "model": "M18 FCOS230",
     "description": "230mm電動切割機, 適用於金屬及混凝土切割。配備高性能無刷馬達, 提供強大切割力, 附帶安全護罩及防塵設計, 適合重型工業應用。",
@@ -161,7 +161,7 @@
   },
   {
     "no": 17,
-    "name": "Bosch 電熱風槍",
+    "name": "Bosch電熱風槍",
     "brand": "Bosch",
     "model": "GHG 20-63",
     "description": "2000W電熱風槍, 溫度可調, 適用於除漆及熱縮。配備多段溫度與風量控制, 確保精準操作, 附帶多款噴嘴, 適合多種表面處理任務。",
@@ -171,7 +171,7 @@
   },
   {
     "no": 18,
-    "name": "DeWalt 電動刨床",
+    "name": "DeWalt電動刨床",
     "brand": "DeWalt",
     "model": "D26676",
     "description": "82mm電動刨床, 適用於木材表面平整。高轉速刀片提供平滑刨削效果, 配備深度調節旋鈕, 操作簡單, 適合木工及家具製作。",
@@ -181,7 +181,7 @@
   },
   {
     "no": 19,
-    "name": "Makita 拋光機",
+    "name": "Makita拋光機",
     "brand": "Makita",
     "model": "9237C",
     "description": "180mm電動拋光機, 適用於金屬及汽車表面拋光。配備可調速控制及柔軟啟動功能, 確保平滑拋光效果, 適合專業汽車維修及金屬加工。",
@@ -191,7 +191,7 @@
   },
   {
     "no": 20,
-    "name": "Milwaukee 充電式電鋸",
+    "name": "Milwaukee充電式電鋸",
     "brand": "Milwaukee",
     "model": "M12 FHS",
     "description": "12V充電式電鋸, 輕便設計, 適合快速木材切割。高效馬達提供穩定切割力, 配備快速刀片更換系統, 適合園藝及小型木材加工。",
@@ -201,7 +201,7 @@
   },
   {
     "no": 21,
-    "name": "Bosch 砂輪機",
+    "name": "Bosch砂輪機",
     "brand": "Bosch",
     "model": "GBG 35-15",
     "description": "150mm雙輪砂輪機, 適用於刀具及金屬磨削。配備穩定底座及可調護罩, 確保安全操作, 適合刀具修整及金屬表面處理。",
@@ -211,7 +211,7 @@
   },
   {
     "no": 22,
-    "name": "DeWalt 無刷角磨機",
+    "name": "DeWalt無刷角磨機",
     "brand": "DeWalt",
     "model": "DCG405N",
     "description": "125mm無刷角磨機, 配備電子離合器, 安全耐用。高效無刷馬達提供穩定動力, 適合金屬切割及打磨, 附帶防滑手柄, 提升操作舒適度。",
@@ -221,7 +221,7 @@
   },
   {
     "no": 23,
-    "name": "Makita 電動衝擊扳手",
+    "name": "Makita電動衝擊扳手",
     "brand": "Makita",
     "model": "TW0350",
     "description": "400W電動衝擊扳手, 適合重型螺栓固定。提供高扭力輸出, 配備堅固外殼, 耐用性強, 適合機械維修及建築工地使用。",
@@ -231,7 +231,7 @@
   },
   {
     "no": 24,
-    "name": "Milwaukee 電熱風槍",
+    "name": "Milwaukee電熱風槍",
     "brand": "Milwaukee",
     "model": "M18 BHG",
     "description": "18V充電式熱風槍, 快速加熱, 適用於多種表面處理。配備多段溫度調節及LED燈, 適合除漆、熱縮及焊接作業, 輕便設計便於攜帶。",
