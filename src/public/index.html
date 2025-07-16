@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-6 text-center">Admin Dashboard</h1>
+
+    <!-- Login Section -->
+    <div id="login-section" class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4 text-center">Login</h2>
+      <div class="bg-white p-6 rounded shadow-md max-w-md mx-auto">
+        <input id="username" type="text" placeholder="Username" class="w-full p-2 mb-4 border rounded">
+        <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 border rounded">
+        <button onclick="login()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Login</button>
+        <p id="login-error" class="text-red-500 mt-2 hidden">Invalid credentials</p>
+      </div>
+    </div>
+
+    <!-- Navigation Section (Hidden until logged in) -->
+    <div id="navigation-section" class="hidden">
+      <h2 class="text-2xl font-semibold mb-4 text-center">Manage Collections</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <a href="/admin/product" class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">Manage Products</a>
+        <a href="/admin/shop" class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">Manage Shops</a>
+        <a href="/admin/question" class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">Manage Questions</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = null;
+
+    // Login function
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        if (data.token) {
+          token = data.token;
+          localStorage.setItem('token', token); // Store token for other pages
+          document.getElementById('login-section').classList.add('hidden');
+          document.getElementById('navigation-section').classList.remove('hidden');
+        } else {
+          document.getElementById('login-error').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        document.getElementById('login-error').classList.remove('hidden');
+      }
+    }
+
+    // Check if already logged in
+    window.onload = () => {
+      token = localStorage.getItem('token');
+      if (token) {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('navigation-section').classList.remove('hidden');
+      }
+    };
+  </script>
+</body>
+</html>

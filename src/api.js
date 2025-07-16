@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.use((err, req, res, next) => {
     if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        return res.status(400).json({ error: 'Invalid JSON input' });
+        return res.status(400).json({ 錯誤: '錯誤的JSON輸入' });
     }
     next(err);
 })
@@ -23,14 +23,14 @@ const authenticate = async (req, res, next) => {
         req.user = { "id": loginObj.id, "username": loginObj.username };
         next();
     } else {
-        res.status(400).json({ "err": "input wrong!! user or password!" });
+        res.status(400).json({ "錯誤": "賬號或密碼錯誤！" });
     }
 }
 
 //20250710 LOUIS：authorize 邏輯維持不變
 const authorize = (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;//the bearer and token
+        const authHeader = req.headers.authorization;// Bearer + authorizationtoken
         if (authHeader === undefined || authHeader === null) {
             return res.sendStatus(401);
         }
@@ -52,7 +52,6 @@ const authorize = (req, res, next) => {
 
 // 20250712 增加Joi進行初步驗證資料和類型是否正確
 const productSchema = Joi.object({
-    no: Joi.number().required(),
     name: Joi.string().required(),
     brand: Joi.string().required(),
     model: Joi.string().required(),
@@ -63,7 +62,6 @@ const productSchema = Joi.object({
 })
 
 const shopSchema = Joi.object({
-    no: Joi.number().required(),
     name: Joi.string().required(),
     region: Joi.string().required(),
     district: Joi.string().required(),
@@ -75,7 +73,6 @@ const shopSchema = Joi.object({
 })
 
 const questionSchema = Joi.object({
-    no: Joi.number().required(),
     question: Joi.string().required(),
     answer: Joi.string().required(),
 })
@@ -109,7 +106,8 @@ router.post("/product", authorize, async (req, res) => {
     try {
         const { error } = productSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            console.log(error.details[0].message)
+            return res.status(400).json({ 錯誤: error.details[0].message });
         }
         const addOBj = await createOBJToDB(req.body, 'product');
         if (addOBj) {
@@ -119,8 +117,8 @@ router.post("/product", authorize, async (req, res) => {
             res.status(400).send("增加商品失敗");
         }
     } catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(增加商品)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "增加商品錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -130,8 +128,8 @@ router.get("/product", async (req, res) => {
         const readfile = await readJsonFromMongo("product");
         res.end(readfile);
     } catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(讀取商品)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "讀取商品錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -151,8 +149,8 @@ router.put("/product/:pid", authorize, async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(更新商品)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "更新商品錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -168,8 +166,8 @@ router.delete("/product/:pid", authorize, async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(刪除商品)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "刪除商品錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -190,8 +188,8 @@ router.post("/shop", authorize, async (req, res) => {
             res.status(400).send("增加商店失敗");
         }
     } catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(增加商店)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "增加商店錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -201,8 +199,8 @@ router.get("/shop", async (req, res) => {
         const readfile = await readJsonFromMongo("shop");
         res.end(readfile);
     } catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(讀取商店)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "讀取商店錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -222,8 +220,8 @@ router.put("/shop/:pid", authorize, async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(更新商店)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "更新商店錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -239,8 +237,8 @@ router.delete("/shop/:pid", authorize, async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(刪除商店)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "刪除商店錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -261,8 +259,8 @@ router.post("/question", authorize, async (req, res) => {
             res.status(400).send("增加問題失敗");
         }
     } catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(增加問題)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "增加問題錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -272,8 +270,8 @@ router.get("/question", async (req, res) => {
         const readfile = await readJsonFromMongo("question");
         res.end(readfile);
     } catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(讀取問題)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "讀取問題錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -293,8 +291,8 @@ router.put("/question/:pid", authorize, async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(更新問題)" });
-        console.error(error);
+        res.status(500).json({ "錯誤": "更新問題錯誤" });
+        console.error(error.message);
     }
 })
 
@@ -310,8 +308,8 @@ router.delete("/question/:pid", authorize, async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "API出錯(刪除問題)" });
-        console.error(error);
+        console.error(error.message);
+        res.status(500).json({ "錯誤": "刪除問題錯誤" });
     }
 })
 
@@ -323,7 +321,7 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
         const maxPriceNum = Number(maxprice);
 
         if (isNaN(minPriceNum) || isNaN(maxPriceNum)) {
-            res.status(400).json({ error: '錯誤最低或最高價' });
+            res.status(400).json({ 錯誤: '請輸入正確的最低和最高價格' });
             return [];
         }
 
@@ -340,8 +338,8 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({ error: 'search api 錯誤' });
+        console.error(error.message);
+        res.status(500).json({ 錯誤: '查詢商品名稱和價格錯誤' });
     }
 });
 
@@ -360,8 +358,8 @@ router.get('/search/:param1', async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({ error: 'search api 錯誤' });
+        console.error(error.message);
+        res.status(500).json({ 錯誤: '查詢商品名稱錯誤' });
     }
 })
 
@@ -379,56 +377,56 @@ router.get('/question/:param1', async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({ error: 'question api 錯誤' });
+        console.error(error.message);
+        res.status(500).json({ 錯誤: '查詢問題答案錯誤' });
     }
 })
 
 // location
 router.get("/location/:param1/:param2", async (req, res) => {
-  try {
-    const { param1, param2 } = req.params;
-    const latitude = parseFloat(param1);
-    const longitude = parseFloat(param2);
+    try {
+        const { param1, param2 } = req.params;
+        const latitude = parseFloat(param1);
+        const longitude = parseFloat(param2);
 
-    if (
-      isNaN(latitude) ||
-      isNaN(longitude) ||
-      !isFinite(latitude) ||
-      !isFinite(longitude) ||
-      latitude < -90 ||
-      latitude > 90 ||
-      longitude < -180 ||
-      longitude > 180
-    ) {
-      return res.status(400).json({ error: "輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180" });
+        if (
+            isNaN(latitude) ||
+            isNaN(longitude) ||
+            !isFinite(latitude) ||
+            !isFinite(longitude) ||
+            latitude < -90 ||
+            latitude > 90 ||
+            longitude < -180 ||
+            longitude > 180
+        ) {
+            return res.status(400).json({ 錯誤: "輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180" });
+        }
+
+        const shopString = await readJsonFromMongo("shop");
+        let shopJSON = JSON.parse(shopString);
+
+        if (!Array.isArray(shopJSON)) {
+            return res.status(500).json({ 錯誤: "商店資料格式錯誤，應為陣列" });
+        }
+
+        const coords1 = { latitude, longitude };
+        const result = shopJSON.filter((shop) => {
+            const shopLat = parseFloat(shop.latitude);
+            const shopLon = parseFloat(shop.longitude);
+
+            if (isNaN(shopLat) || isNaN(shopLon) || !isFinite(shopLat) || !isFinite(shopLon)) {
+                return {};
+            }
+
+            const coords2 = { latitude: shopLat, longitude: shopLon };
+            return havesineDistance(coords1, coords2) <= 2;
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ 錯誤: "獲取附近商店資料錯誤" });
     }
-
-    const shopString = await readJsonFromMongo("shop");
-    let shopJSON = JSON.parse(shopString);
-
-    if (!Array.isArray(shopJSON)) {
-      return res.status(500).json({ error: "商店資料格式錯誤，應為陣列" });
-    }
-
-    const coords1 = { latitude, longitude };
-    const result = shopJSON.filter((shop) => {
-      const shopLat = parseFloat(shop.latitude);
-      const shopLon = parseFloat(shop.longitude);
-
-      if (isNaN(shopLat) || isNaN(shopLon) || !isFinite(shopLat) || !isFinite(shopLon)) {
-        return {};
-      }
-
-      const coords2 = { latitude: shopLat, longitude: shopLon };
-      return havesineDistance(coords1, coords2) <= 2;
-    });
-
-    res.json(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "API出錯(商店位置)" });
-  }
 });
 
 //top5 product
@@ -439,8 +437,8 @@ router.get('/top5Product', async (req, res) => {
         const top5Product = productJSON.sort((a, b) => b.hot - a.hot).slice(0, 5)
         res.json(top5Product);
     } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({ error: 'top5 api 錯誤' });
+        console.error(error.message);
+        res.status(500).json({ 錯誤: '獲取商品熱度前五數據錯誤' });
     }
 })
 
@@ -470,7 +468,7 @@ router.get('/top5Product', async (req, res) => {
 // })
 
 router.post("/login", authenticate, (req, res) => {
-    const token = jwt.sign(req.user, process.env.JWT_SECRET, { "expiresIn": "2h" })
+    const token = jwt.sign(req.user, process.env.JWT_SECRET, { "expiresIn": "88888h" })
     res.json({ token });
 })
 

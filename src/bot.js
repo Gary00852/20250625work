@@ -266,5 +266,5 @@ export function startBot() {
     handleSearchCommand(chatId, input);
   });
 
-  console.log('Telegram Bot is running');
+  console.log('Bot: Telegram Bot 運行中');
 }

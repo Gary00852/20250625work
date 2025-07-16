@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Products</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-4">
+    <!-- Header with Username and Logout -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">Manage Products</h1>
+      <div class="flex items-center space-x-4">
+        <span id="username" class="text-lg font-semibold"></span>
+        <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+      </div>
+    </div>
+    <a href="/admin" class="text-blue-500 hover:underline mb-4 inline-block">← Back to Dashboard</a>
+
+    <!-- Product Form -->
+    <div class="bg-white p-6 rounded shadow-md mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Add/Update Product</h2>
+      <input id="product-id" type="hidden">
+      <input id="product-no" type="number" placeholder="No" class="w-full p-2 mb-2 border rounded">
+      <input id="product-name" type="text" placeholder="Name" class="w-full p-2 mb-2 border rounded">
+      <input id="product-brand" type="text" placeholder="Brand" class="w-full p-2 mb-2 border rounded">
+      <input id="product-model" type="text" placeholder="Model" class="w-full p-2 mb-2 border rounded">
+      <textarea id="product-description" placeholder="Description" class="w-full p-2 mb-2 border rounded"></textarea>
+      <input id="product-price_hkd" type="number" placeholder="Price (HKD)" class="w-full p-2 mb-2 border rounded">
+      <input id="product-category_type" type="number" placeholder="Category Type" class="w-full p-2 mb-2 border rounded">
+      <input id="product-hot" type="number" placeholder="Hot" class="w-full p-2 mb-2 border rounded">
+      <button onclick="saveProduct()" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">Save Product</button>
+    </div>
+
+    <!-- Search and Product List -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Product List</h2>
+      <input id="product-search" type="text" placeholder="Search by name..." class="w-full p-2 mb-4 border rounded" oninput="searchItems()">
+      <div id="product-list" class="mt-4"></div>
+    </div>
+  </div>
+
+  <script>
+    const collection = 'product';
+    let token = localStorage.getItem('token');
+    let allItems = []; // Store all fetched items
+
+    // Redirect to login if no token
+    if (!token) {
+      window.location.href = '/admin';
+    }
+
+    // JWT decode function
+    function jwtDecode(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return {};
+      }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/admin';
+    }
+
+    // Display username
+    function displayUsername() {
+      const decoded = jwtDecode(token);
+      const usernameElement = document.getElementById('username');
+      usernameElement.textContent = decoded.username || 'User';
+    }
+
+    // Load data
+    async function loadData() {
+      try {
+        const response = await fetch(`/${collection}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.status === 401) {
+          window.location.href = '/admin';
+          return;
+        }
+        allItems = await response.json();
+        renderItems(allItems);
+      } catch (error) {
+        console.error(`Error loading ${collection}:`, error);
+        window.location.href = '/admin';
+      }
+    }
+
+    // Render items (limited to 15, filtered by search)
+    function renderItems(items) {
+      const searchQuery = document.getElementById(`${collection}-search`).value.toLowerCase();
+      const filteredItems = items.filter(item => 
+        item.name && item.name.toLowerCase().includes(searchQuery)
+      ).slice(0, 15); // Limit to 15 items
+      const list = document.getElementById(`${collection}-list`);
+      list.innerHTML = '';
+      filteredItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'bg-white p-4 mb-2 rounded shadow flex justify-between';
+        div.innerHTML = `
+          <span>${item.no}: ${item.name}</span>
+          <div>
+            <button onclick="editItem('${item._id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">Edit</button>
+            <button onclick="deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    // Search items
+    function searchItems() {
+      renderItems(allItems);
+    }
+
+    // Edit item
+    async function editItem(id) {
+      try {
+        const item = allItems.find(i => i._id === id);
+        if (item) {
+          document.getElementById(`${collection}-id`).value = id;
+          Object.keys(item).forEach(key => {
+            if (key !== '_id') {
+              const input = document.getElementById(`${collection}-${key}`);
+              if (input) input.value = item[key];
+            }
+          });
+        }
+      } catch (error) {
+        console.error(`Error editing ${collection}:`, error);
+      }
+    }
+
+    // Delete item
+    async function deleteItem(id) {
+      try {
+        const response = await fetch(`/${collection}/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.status === 201) {
+          alert(`${collection} deleted successfully`);
+          loadData();
+        } else {
+          alert(`Failed to delete ${collection}`);
+        }
+      } catch (error) {
+        console.error(`Error deleting ${collection}:`, error);
+      }
+    }
+
+    // Save product
+    async function saveProduct() {
+      const id = document.getElementById('product-id').value;
+      const data = {
+        no: Number(document.getElementById('product-no').value),
+        name: document.getElementById('product-name').value,
+        brand: document.getElementById('product-brand').value,
+        model: document.getElementById('product-model').value,
+        description: document.getElementById('product-description').value,
+        price_hkd: Number(document.getElementById('product-price_hkd').value),
+        category_type: Number(document.getElementById('product-category_type').value),
+        hot: Number(document.getElementById('product-hot').value)
+      };
+      saveItem(id, data);
+    }
+
+    // Generic save function
+    async function saveItem(id, data) {
+      try {
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/${collection}/${id}` : `/${collection}`;
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+        if (response.status === 201) {
+          alert(`${collection} ${id ? 'updated' : 'created'} successfully`);
+          loadData();
+          document.querySelectorAll(`#${collection}-form input, #${collection}-form textarea`).forEach(input => input.value = '');
+          document.getElementById(`${collection}-id`).value = '';
+        } else {
+          alert(`Failed to ${id ? 'update' : 'create'} ${collection}`);
+        }
+      } catch (error) {
+        console.error(`Error saving ${collection}:`, error);
+      }
+    }
+
+    // Load data and username on page load
+    window.onload = () => {
+      displayUsername();
+      loadData();
+    };
+  </script>
+</body>
+</html>

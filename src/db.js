@@ -8,13 +8,13 @@ dotenv.config();
 async function connectDB() {
     try {
         await mongoose.connect(`mongodb://localhost:27017/${process.env.DATABASE_NAME}`, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+            // useNewUrlParser: true,
+            // useUnifiedTopology: true,
             serverSelectionTimeoutMS: 5000 // 設置連接超時
         });
-        console.log('MongoDB 連線成功');
+        console.log('數據庫: MongoDB 運行中');
     } catch (error) {
-        console.error('MongoDB 連線失敗:', error);
+        console.error('數據庫: MongoDB 運行失敗:', error);
         throw error;
     }
 }
@@ -22,7 +22,7 @@ async function connectDB() {
 // 定義 schemas
 const schemas = {
     product: new mongoose.Schema({
-        no: Number,
+        timestamp: Number,
         name: String,
         brand: String,
         model: String,
@@ -32,7 +32,7 @@ const schemas = {
         hot: Number
     }),
     shop: new mongoose.Schema({
-        no: Number,
+        timestamp: Number,
         name: String,
         region: String,
         district: String,
@@ -43,12 +43,12 @@ const schemas = {
         opening_hours: String
     }),
     question: new mongoose.Schema({
-        no: Number,
+        timestamp: Number,
         question: String,
         answer: String
     }),
     login: new mongoose.Schema({
-        no: Number,
+        timestamp: Number,
         password: String,
         username: String
     }),
@@ -91,22 +91,16 @@ async function incrementHot(DB_id) {
 
 async function createOBJToDB(obj, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("wrong schemas!");
+        console.log("createOBJToDB: schemas不存在");
         return false;
     }
 
     try {
         const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
-        const existingUser = await User.findOne({ no: obj.no });
-        if (existingUser) {
-            console.log(`增加的號碼(no: ${obj.no})在 ${collectionName} 已經存在`);
-            return false;
-            //throw new Error(`增加的號碼(no: ${obj.no})在 ${collectionName} 已經存在`);
-        } else {
-            await User.create(obj);
-            console.log('加入對象完畢');
-            return true;
-        }
+        Object.assign(obj,{"timestamp" : Date.now()});
+        await User.create(obj);
+        console.log('加入對象完畢');
+        return true;
     } catch (error) {
         console.error('加入對象錯誤:', error);
         return false;
@@ -115,12 +109,13 @@ async function createOBJToDB(obj, collectionName) {
 
 async function updateOBJToDB(id, obj, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("wrong schemas!");
+        console.log("updateOBJToDB: schemas不存在");
         return false;
     }
 
     try {
         const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
+        Object.assign(obj,{"timestamp":Date.now()});
         const result = await User.findByIdAndUpdate(id, obj);
         if (!result || result == null) {
             console.log('修改對象不存在或錯誤', result);
@@ -138,7 +133,7 @@ async function updateOBJToDB(id, obj, collectionName) {
 
 async function delelteOBJToDB(id, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("wrong schemas!");
+        console.log("delelteOBJToDB: schemas不存在");
         return false;
     }
 
@@ -174,12 +169,15 @@ async function delelteOBJToDB(id, collectionName) {
 
 async function readJsonFromMongo(collectionName) {
     try {
+     if (!schemas[collectionName]) {
+        throw new Error(`錯誤的collectionName: ${collectionName}`);
+     }       
         // const Model = getModel(collectionName);
         const Model = mongoose.model(collectionName, schemas[collectionName], collectionName)
         const data = await Model.find().lean();
         return JSON.stringify(data);
     } catch (error) {
-        console.error('Error reading MongoDB data:', error);
+        console.error('readJsonFromMongo錯誤:', error);
         throw new Error(error.message);
     }
 }
