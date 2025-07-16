@@ -1,6 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
 import axios from "axios";
+import { havesineDistance } from './api.js';
 import { incrementHot } from './db.js';
 
 dotenv.config();
@@ -74,12 +75,15 @@ async function showTheLocationMap(chatId, latitude, longitude) {
   }
 }
 
-async function printoutShop(court, bot, fromId) {
+async function printoutShop(court, bot, fromId,latitude,longitude) {
   for (const item of court) {
+    const coords1 = { latitude, longitude };
+    const coords2 = { latitude:item.latitude,longitude:item.longitude};
     let resp = `📍店鋪: ${item.name}\n`;
     resp += `🌟地址: ${item.address}\n`;
     resp += `🎉電話: ${item.phone}\n`;
-    resp += `✨時間: ${item.opening_hours}\n`;
+    resp += `✨營業: ${item.opening_hours}\n`;
+    resp += `🛒距離: ${Math.round(havesineDistance(coords1,coords2)*1000)}米\n`;
     await bot.sendMessage(fromId, resp); //ps:await 順序顯示
     resp = "";
     await showTheLocationMap(fromId, item.latitude, item.longitude);
@@ -182,7 +186,7 @@ export function startBot() {
       const locationJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/location/${msg.location.latitude}/${msg.location.longitude}`);
       if (locationJson.data.length > 0) {
         await bot.sendMessage(fromId, "以下為指定地點附近的店鋪：(<=2KM)");
-        await printoutShop(locationJson.data, bot, fromId);
+        await printoutShop(locationJson.data, bot, fromId,msg.location.latitude,msg.location.longitude);
       } else {
         await bot.sendMessage(fromId, "你的附近兩公里内沒有我們的店鋪。");
       }

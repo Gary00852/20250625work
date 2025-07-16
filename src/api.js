@@ -78,7 +78,7 @@ const questionSchema = Joi.object({
 })
 
 //function
-function havesineDistance(coords1, coords2, isMiles = false) {
+export function havesineDistance(coords1, coords2, isMiles = false) {
     const toRad = x => x * Math.PI / 180;
     const lat1 = coords1.latitude;
     const lon1 = coords1.longitude;
