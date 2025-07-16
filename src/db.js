@@ -99,7 +99,7 @@ async function createOBJToDB(obj, collectionName) {
         const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
         Object.assign(obj,{"timestamp" : Date.now()});
         await User.create(obj);
-        console.log('加入對象完畢');
+        console.log('加入對象完畢',obj);
         return true;
     } catch (error) {
         console.error('加入對象錯誤:', error);
