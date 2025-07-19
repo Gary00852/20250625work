@@ -89,15 +89,15 @@ async function showTheLocationMap(chatId, latitude, longitude) {
   }
 }
 
-async function printoutShop(court, bot, fromId,latitude,longitude) {
+async function printoutShop(court, bot, fromId, latitude, longitude) {
   for (const item of court) {
     const coords1 = { latitude, longitude };
-    const coords2 = { latitude:item.latitude,longitude:item.longitude};
+    const coords2 = { latitude: item.latitude, longitude: item.longitude };
     let resp = `📍店鋪: ${item.name}\n`;
     resp += `🌟地址: ${item.address}\n`;
     resp += `🎉電話: ${item.phone}\n`;
     resp += `✨營業: ${item.opening_hours}\n`;
-    resp += `🛒距離: ${Math.round(havesineDistance(coords1,coords2)*1000)}米\n`;
+    resp += `🛒距離: ${Math.round(havesineDistance(coords1, coords2) * 1000)}米\n`;
     await bot.sendMessage(fromId, resp); //ps:await 順序顯示
     resp = "";
     await showTheLocationMap(fromId, item.latitude, item.longitude);
@@ -176,14 +176,18 @@ export function startBot() {
       await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     } else if (data === 'button5') {
       const top5Json = await getJSON(`http://localhost:${process.env.SERVER_PORT}/top5Product`);
-      let resp = `🌟✨ 周星星至hot產品介紹! ✨🌟\n(根據搜索次數由多至少排序)\n
+      let resp = "抱歉，該功能出現少少問題，會於稍後進行修復。"
+      if (top5Json.data.length == 5) {
+        resp = `🌟✨ 周星星至hot產品介紹! ✨🌟\n(根據搜索次數由多至少排序)\n
 👍no1: ${top5Json.data[0].name}\n搜尋次數: ${top5Json.data[0].hot}\n
 👍no2: ${top5Json.data[1].name}\n搜尋次數: ${top5Json.data[1].hot}\n
 👍no3: ${top5Json.data[2].name}\n搜尋次數: ${top5Json.data[2].hot}\n
 👍no4: ${top5Json.data[3].name}\n搜尋次數: ${top5Json.data[3].hot}\n
 👍no5: ${top5Json.data[4].name}\n搜尋次數: ${top5Json.data[4].hot}\n
 \n`;
+      }
       await bot.sendMessage(chatId, resp);
+
       await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
     //呢個係確認已收取的callback
@@ -200,7 +204,7 @@ export function startBot() {
       const locationJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/location/${msg.location.latitude}/${msg.location.longitude}`);
       if (locationJson.data.length > 0) {
         await bot.sendMessage(fromId, "以下為指定地點附近的店鋪：(<=2KM)");
-        await printoutShop(locationJson.data, bot, fromId,msg.location.latitude,msg.location.longitude);
+        await printoutShop(locationJson.data, bot, fromId, msg.location.latitude, msg.location.longitude);
       } else {
         await bot.sendMessage(fromId, "你的附近兩公里内沒有我們的店鋪。");
       }
@@ -227,10 +231,10 @@ export function startBot() {
     } catch (error) {
       console.error("handleQuestionCommand: ", error);
       await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_QUESTIONS);
-    }finally{
+    } finally {
       await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
-    
+
   }
 
   bot.onText(/\/question(?:\s+(\S+))?/, async (msg, match) => {
@@ -270,17 +274,10 @@ export function startBot() {
         }
       }
     } catch (error) {
-      // console.log("handleSearchCommand:", error);
-      // await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_SEARCH);
-      let errorMessage = ERROR_MESSAGES.SERVER_ERROR;
-      if (error.response) {
-        errorMessage = `API 請求失敗：${error.response.status}`;
-      } else if (error.name === 'TypeError') {
-        errorMessage = ERROR_MESSAGES.INVALID_INPUT;
-      }
-      await sendTips(bot, chatId, errorMessage, TIPS_SEARCH);
-    }finally{
-    await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
+      console.error("handleSearchCommand:", error);
+     // await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_SEARCH);
+    } finally {
+      await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
   }
 

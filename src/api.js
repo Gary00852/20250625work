@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
-import { checkAdminNameAndPassword,findInMongo, insertIntoMongo, updateInMongo, deleteFromMongo } from './db.js';
+import { checkAdminNameAndPassword, findInMongo, insertIntoMongo, updateInMongo, deleteFromMongo } from './db.js';
 import Joi from "joi";
 
 dotenv.config();
@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.use((err, req, res, next) => {
     if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        return res.status(400).json({ 錯誤: '錯誤的JSON輸入' });
+        return res.status(400).json({ "錯誤": '錯誤的JSON輸入' });
     }
     next(err);
 })
@@ -18,12 +18,13 @@ router.use((err, req, res, next) => {
 //20250710 LOUIS：改爲使用數據庫存儲，跳轉到db.js進行驗證，回傳obj為空時密碼錯誤或不存在
 const authenticate = async (req, res, next) => {
     const { username, password } = req.body;
-    const loginObj = await checkAdminNameAndPassword(username, password);
-    if ("id" in loginObj) {
-        req.user = { "id": loginObj.id, "username": loginObj.username };
+    const resultObj = await checkAdminNameAndPassword(username, password);
+    if (resultObj.success) {
+        req.user = { "id": resultObj.id, "username": resultObj.username };
         next();
-    } else {
-        res.status(400).json({ "錯誤": "賬號或密碼錯誤！" });
+    }
+    else {
+        res.status(400).json({ "錯誤": "賬號或密碼錯誤" });
     }
 }
 
@@ -32,21 +33,21 @@ const authorize = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;// Bearer + authorizationtoken
         if (authHeader === undefined || authHeader === null) {
-            return res.status(401).json({ 錯誤: '缺失授權頭' });
+            return res.status(401).json({ "錯誤": '缺失授權頭' });
         }
         const token = authHeader.split(" ")[1];
         if (token == null)
-            return res.status(401).json({ 錯誤: '無效的令牌格式' });
+            return res.status(401).json({ "錯誤": '無效的令牌格式' });
 
         jwt.verify(token, process.env.JWT_SECRET, (err, userobj) => {
-            if (err){
-                return res.status(403).json({ 錯誤: '令牌驗證失敗' });
+            if (err) {
+                return res.status(403).json({ "錯誤": '令牌驗證失敗' });
             }
             req.user = userobj;
             next();
         });
     } catch (error) {
-        console.log(error);
+        console.error(error.message);
     }
 }
 
@@ -105,30 +106,28 @@ router.post("/product", authorize, async (req, res) => {
     try {
         const { error } = productSchema.validate(req.body);
         if (error) {
-            console.log(error.details[0].message)
-            return res.status(400).json({ 錯誤: error.details[0].message });
+            return res.status(400).json({ success: false, message: error.details[0].message });
         }
-        const addOBj = await insertIntoMongo(req.body, 'product');
-        if (addOBj) {
-            res.status(201).send("增加商品成功");
-        }
-        else {
-            res.status(400).send("增加商品失敗");
+        const resultObj = await insertIntoMongo(req.body, 'product');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     } catch (error) {
-        res.status(500).json({ "錯誤": "增加商品錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "增加商品錯誤" });
     }
 })
 
 // Product Read
 router.get("/product", async (req, res) => {
     try {
-        const readfile = await findInMongo("product");
+        const readfile = await findInMongo("product1");
         res.end(readfile);
     } catch (error) {
-        res.status(500).json({ "錯誤": "讀取商品錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "讀取商品錯誤" });
     }
 })
 
@@ -137,36 +136,34 @@ router.put("/product/:pid", authorize, async (req, res) => {
     try {
         const { error } = productSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            return res.status(400).json({ success: false, message: error.details[0].message });
         }
-        const updateOBJ = await updateInMongo(req.params.pid, req.body, 'product');
-        if (updateOBJ) {
-            res.status(201).send("更新商品成功");
-        }
-        else {
-            res.status(400).send("更新商品失敗");
+        const resultObj = await updateInMongo(req.params.pid, req.body, 'product');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "更新商品錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "更新商品錯誤" });
     }
 })
 
 // Product Delete (id使用db默認生成的_id)
 router.delete("/product/:pid", authorize, async (req, res) => {
     try {
-        const deleteOBJ = await deleteFromMongo(req.params.pid, 'product');
-        if (deleteOBJ) {
-            res.status(201).send("刪除商品成功");
-        }
-        else {
-            res.status(400).send("刪除商品失敗");
+        const resultObj = await deleteFromMongo(req.params.pid, 'product');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "刪除商品錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "刪除問題錯誤" });
     }
 })
 
@@ -177,18 +174,17 @@ router.post("/shop", authorize, async (req, res) => {
     try {
         const { error } = shopSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            return res.status(400).json({ success: false, message: error.details[0].message });
         }
-        const addOBj = await insertIntoMongo(req.body, 'shop');
-        if (addOBj) {
-            res.status(201).send("增加商店成功");
-        }
-        else {
-            res.status(400).send("增加商店失敗");
+        const resultObj = await insertIntoMongo(req.body, 'shop');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     } catch (error) {
-        res.status(500).json({ "錯誤": "增加商店錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "增加商店錯誤" });
     }
 })
 
@@ -198,8 +194,8 @@ router.get("/shop", async (req, res) => {
         const readfile = await findInMongo("shop");
         res.end(readfile);
     } catch (error) {
-        res.status(500).json({ "錯誤": "讀取商店錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "讀取商店錯誤" });
     }
 })
 
@@ -210,34 +206,32 @@ router.put("/shop/:pid", authorize, async (req, res) => {
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
-        const updateOBJ = await updateInMongo(req.params.pid, req.body, 'shop');
-        if (updateOBJ) {
-            res.status(201).send("更新商店成功");
-        }
-        else {
-            res.status(400).send("更新商店失敗");
+        const resultObj = await updateInMongo(req.params.pid, req.body, 'shop');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "更新商店錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "更新商店錯誤" });
     }
 })
 
 // Shop Delete (id使用db默認生成的_id)
 router.delete("/shop/:pid", authorize, async (req, res) => {
     try {
-        const deleteOBJ = await deleteFromMongo(req.params.pid, 'shop');
-        if (deleteOBJ) {
-            res.status(201).send("刪除商店成功");
-        }
-        else {
-            res.status(400).send("刪除商店失敗");
+        const resultObj = await deleteFromMongo(req.params.pid, 'shop');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "刪除商店錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "刪除問題錯誤" });
     }
 })
 
@@ -248,18 +242,17 @@ router.post("/question", authorize, async (req, res) => {
     try {
         const { error } = questionSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            return res.status(400).json({ success: false, message: error.details[0].message });
         }
-        const addOBj = await insertIntoMongo(req.body, 'question');
-        if (addOBj) {
-            res.status(201).send("增加問題成功");
-        }
-        else {
-            res.status(400).send("增加問題失敗");
+        const resultObj = await insertIntoMongo(req.body, 'question');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     } catch (error) {
-        res.status(500).json({ "錯誤": "增加問題錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "增加問題錯誤" });
     }
 })
 
@@ -269,8 +262,8 @@ router.get("/question", async (req, res) => {
         const readfile = await findInMongo("question");
         res.end(readfile);
     } catch (error) {
-        res.status(500).json({ "錯誤": "讀取問題錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "讀取問題錯誤" });
     }
 })
 
@@ -281,29 +274,27 @@ router.put("/question/:pid", authorize, async (req, res) => {
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
-        const updateOBJ = await updateInMongo(req.params.pid, req.body, 'question');
-        if (updateOBJ) {
-            res.status(201).send("更新問題成功");
-        }
-        else {
-            res.status(400).send("更新問題失敗");
+        const resultObj = await updateInMongo(req.params.pid, req.body, 'question');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
-        res.status(500).json({ "錯誤": "更新問題錯誤" });
         console.error(error.message);
+        res.status(500).json({ "錯誤": "更新問題錯誤" });
     }
 })
 
 // Question Delete (id使用db默認生成的_id)
 router.delete("/question/:pid", authorize, async (req, res) => {
     try {
-        const deleteOBJ = await deleteFromMongo(req.params.pid, 'question');
-        if (deleteOBJ) {
-            res.status(201).send("刪除問題成功");
-        }
-        else {
-            res.status(400).send("刪除問題失敗");
+        const resultObj = await deleteFromMongo(req.params.pid, 'question');
+        if (resultObj.success) {
+            res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
+        } else {
+            res.status(400).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
@@ -320,7 +311,7 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
         const maxPriceNum = Number(maxprice);
 
         if (isNaN(minPriceNum) || isNaN(maxPriceNum)) {
-            res.status(400).json({ 錯誤: '請輸入正確的最低和最高價格' });
+            res.status(400).json({ "錯誤": '請輸入正確的最低和最高價格' });
             return [];
         }
 
@@ -335,13 +326,13 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
             );
         });
         if (result.length === 0) {
-            res.status(404).json({ 錯誤: "沒有找到前五數據" });
+            res.status(404).json({ "錯誤": "沒有找到前五數據" });
             return [];
         }
         res.json(result);
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ 錯誤: '查詢商品名稱和價格錯誤' });
+        res.status(500).json({ "錯誤": '查詢商品名稱和價格錯誤' });
     }
 });
 
@@ -361,7 +352,7 @@ router.get('/search/:param1', async (req, res) => {
         res.json(result);
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ 錯誤: '查詢商品名稱錯誤' });
+        res.status(500).json({ "錯誤": '查詢商品名稱錯誤' });
     }
 })
 
@@ -380,44 +371,44 @@ router.get('/question/:param1', async (req, res) => {
         res.json(result);
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ 錯誤: '查詢問題答案錯誤' });
+        res.status(500).json({ "錯誤": '查詢問題答案錯誤' });
     }
 })
 
 // location 20250718 合為中間件
 const validateLatLong = (req, res, next) => {
-  const { param1, param2 } = req.params;
-  const latitude = parseFloat(param1);
-  const longitude = parseFloat(param2);
+    const { param1, param2 } = req.params;
+    const latitude = parseFloat(param1);
+    const longitude = parseFloat(param2);
 
-  if (
-    isNaN(latitude) ||
-    isNaN(longitude) ||
-    latitude < -90 ||
-    latitude > 90 ||
-    longitude < -180 ||
-    longitude > 180
-  ) {
-    return res.status(400).json({ 錯誤: '輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180' });
-  }
-  req.coords = { latitude, longitude };
-  next();
+    if (
+        isNaN(latitude) ||
+        isNaN(longitude) ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180
+    ) {
+        return res.status(400).json({ "錯誤": '輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180' });
+    }
+    req.coords = { latitude, longitude };
+    next();
 };
 
 //查詢附近商店
 router.get('/location/:param1/:param2', validateLatLong, async (req, res) => {
-  try {
-    const shopString = await findInMongo('shop');
-    const shopJSON = JSON.parse(shopString);
-    const result = shopJSON.filter((shop) => {
-      const coords2 = { latitude: parseFloat(shop.latitude), longitude: parseFloat(shop.longitude) };
-      return havesineDistance(req.coords, coords2) <= 2;
-    });
-    res.json(result);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ 錯誤: '獲取附近商店資料錯誤' });
-  }
+    try {
+        const shopString = await findInMongo('shop');
+        const shopJSON = JSON.parse(shopString);
+        const result = shopJSON.filter((shop) => {
+            const coords2 = { latitude: parseFloat(shop.latitude), longitude: parseFloat(shop.longitude) };
+            return havesineDistance(req.coords, coords2) <= 2;
+        });
+        res.json(result);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ "錯誤": '獲取附近商店資料錯誤' });
+    }
 });
 
 //商品前五物品篩選
@@ -429,7 +420,7 @@ router.get('/top5Product', async (req, res) => {
         res.json(top5Product);
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ 錯誤: '獲取商品熱度前五數據錯誤' });
+        res.status(500).json({ "錯誤": '獲取商品熱度前五數據錯誤' });
     }
 })
 
@@ -438,4 +429,4 @@ router.post("/login", authenticate, (req, res) => {
     res.json({ token });
 })
 
-export default router;
+export default router;//匯出給index.js使用

@@ -57,27 +57,27 @@ const schemas = {
 // 驗證賬號密碼
 async function checkAdminNameAndPassword(username, password) {
     if (!username || !password) {
-        console.log("沒有輸入賬號或密碼")
-        return {};
+        return { success: false, message: "沒有輸入賬號或密碼" };
     }
 
-    const User = mongoose.model('login', schemas['login'], 'login');
+    //const User = mongoose.model('login', schemas['login'], 'login');
+    const User = getModel('login');
     try {
-        const users = await User.find();
-        const user = users.find(u => u.username === username);
+        const user = await User.findOne({ username });
         if (user && bcrypt.compareSync(password, user.password)) {
-            return { id: user.id, username: user.username };
+            return { success: true, message: "賬戶密碼驗證成功", id: user.id, username: user.username };
         }
-        return {};
+        return { success: false, message: "驗證失敗，請檢查賬號密碼" };
     } catch (error) {
-        console.error('查詢錯誤:', error);
-        return {};
+        console.error('驗證賬戶系統有誤:', error);
+        return { success: false, message: "驗證賬戶系統有誤" };
     }
 }
 
 // 討論增加的一個遞加的功能
 async function incrementHot(DB_id) {
-    const User = mongoose.model('product', schemas['product'], 'product');
+    //const User = mongoose.model('product', schemas['product'], 'product');
+    const User = getModel('product');
     try {
         await User.findByIdAndUpdate(
             DB_id,
@@ -89,94 +89,92 @@ async function incrementHot(DB_id) {
     }
 }
 
+// 20250719 以下更新為類json錯誤傳送方式
 async function insertIntoMongo(obj, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("insertIntoMongo: schemas不存在");
-        return false;
+        //throw new Error(`錯誤的collectionName: ${collectionName}`);
+        return { success: false, message: "schemas不存在,加入失敗" };
     }
 
     try {
-        const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
-        Object.assign(obj,{"timestamp" : Date.now()});
-        await User.create(obj);
-        console.log('加入對象完畢',obj);
-        return true;
+        //const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
+        const User = getModel(collectionName);
+        const newObj = { ...obj, "timestamp": Date.now() };
+        await User.create(newObj);
+        return { success: true, message: "加入對象成功", data: newObj };
     } catch (error) {
         console.error('加入對象錯誤:', error);
-        return false;
+        return { success: false, message: "加入對象失敗" };;
     }
 }
 
 async function updateInMongo(id, obj, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("updateInMongo: schemas不存在");
-        return false;
+        return { success: false, message: "schemas不存在,修改失敗" };
     }
 
     try {
-        const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
-        Object.assign(obj,{"timestamp":Date.now()});
-        const result = await User.findByIdAndUpdate(id, obj);
+        //const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
+        const User = getModel(collectionName);
+        const newObj = { ...obj, "timestamp": Date.now() };
+        const result = await User.findByIdAndUpdate(id, newObj);
         if (!result || result == null) {
-            console.log('修改對象不存在或錯誤', result);
-            return false;
+            return { success: false, message: "修改對象不存在或錯誤" };
         }
         else {
-            console.log('修改對象完畢', result);
-            return true;
+           // console.log('修改對象完畢', result);
+            return { success: true, message: "修改成功", data: result };
         }
     } catch (error) {
         console.error('修改對象錯誤:', error);
-        return false;
+        return { success: false, message: "修改對象失敗" };;
     }
 }
 
 async function deleteFromMongo(id, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("deleteFromMongo: schemas不存在");
-        return false;
+        return { success: false, message: "schemas不存在,刪除失敗" };
     }
 
     try {
-        const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
+        //const User = mongoose.model(collectionName, schemas[collectionName], collectionName);
+        const User = getModel(collectionName);
         const result = await User.findByIdAndDelete(id);
         if (!result || result == null) {
-            console.log('刪除對象不存在或錯誤', result);
-            return false;
+            return { success: false, message: "此_id對象不存在" };
         }
         else {
-            console.log('刪除對象完畢', result);
-            return true;
+            return { success: true, message: "刪除對象成功", data: result };
         }
 
     } catch (error) {
-        console.error('刪除對象錯誤:', error);
-        return false;
+        console.error('刪除對象失敗:', error);
+        return { success: false, message: "刪除對象失敗" };;
     }
 }
 
 async function findInMongo(collectionName) {
     try {
-     if (!schemas[collectionName]) {
-        throw new Error(`錯誤的collectionName: ${collectionName}`);
-     }       
+        if (!schemas[collectionName]) {
+            return { success: false, message: "schemas不存在,查找失敗" };
+        }
         const Model = getModel(collectionName);
         //const Model = mongoose.model(collectionName, schemas[collectionName], collectionName)
         const data = await Model.find().lean();
         return JSON.stringify(data);
     } catch (error) {
         console.error('findInMongo錯誤:', error);
-        throw new Error(error.message);
+        return { success: false, message: "查找對象失敗" };
     }
 }
 
 //模型緩存邏輯，避免重複定義模型
 const models = {};
 function getModel(collectionName) {
-  if (!models[collectionName]) {
-    models[collectionName] = mongoose.model(collectionName, schemas[collectionName], collectionName);
-  }
-  return models[collectionName];
+    if (!models[collectionName]) {
+        models[collectionName] = mongoose.model(collectionName, schemas[collectionName], collectionName);
+    }
+    return models[collectionName];
 }
 
-export { checkAdminNameAndPassword, connectDB, incrementHot ,findInMongo,deleteFromMongo,updateInMongo,insertIntoMongo};
+export { checkAdminNameAndPassword, connectDB, incrementHot, findInMongo, deleteFromMongo, updateInMongo, insertIntoMongo };
