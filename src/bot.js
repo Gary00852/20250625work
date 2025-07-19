@@ -5,16 +5,28 @@ import { havesineDistance } from './api.js';
 import { incrementHot } from './db.js';
 
 dotenv.config();
-//常數位置
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+
+// 常數位置
 const TIPS_SEARCH = "😇提示：查詢物品格式為\n輸入/search <物品名稱> [最低價] [最高價]\n如/search makita 800 2000";
 const TIPS_QUESTIONS = "😇提示：查詢問題格式為\n輸入/question <關鍵字>\n如/question 保養";
+const WELCOME_MESSAGE = '✨✨歡迎使用 周星星五金電器鋪查詢系統，點擊以下快捷指令快速獲得本店資訊';
+const RECALL_MESSAGE = ' 🤗 有無其它問題可以幫你？';
 const category = ["鑽孔與螺絲固定工具", "切割工具", "表面處理工具", "其他專業工具"];
+
 // 記錄用戶某些參數 lastTime最後使用時間 action作爲判斷狀態的flag
 const lastInteraction = {};
 
-const welcomeMessage = '✨✨歡迎使用 周星星五金電器鋪查詢系統，點擊以下快捷指令快速獲得本店資訊';
-const recallMessage = ' 🤗 有無其它問題可以幫你？';
+// 20250718 LOUIS: 每小時清理一次超過24小時訪問的客戶防止資料過多爆ram
+setInterval(() => {
+  const now = Date.now();
+  for (const chatId in lastInteraction) {
+    if (now - lastInteraction[chatId].lastTime > 24 * 60 * 60 * 1000) {
+      delete lastInteraction[chatId];
+    }
+  }
+}, 60 * 60 * 1000);
+
 const mainMenu = {
   reply_markup: {
     inline_keyboard: [
@@ -69,9 +81,11 @@ async function showTheLocationMap(chatId, latitude, longitude) {
       }
     });
   } catch (error) {
-    console.error('發送位置失敗:', error);
-    await bot.sendMessage(chatId, '無法發送位置，請稍後再試。');
-    // throw error;
+    let errorMessage = '無法發送位置，請稍後再試';
+    if (error.code === 403) {
+      errorMessage = '無權限發送位置，請聯係任意店舖檢查機器人設置';
+    }
+    await bot.sendMessage(chatId, errorMessage);
   }
 }
 
@@ -99,7 +113,7 @@ export function startBot() {
 
     // 如果用戶超過 1 小時未互動，重新顯示歡迎消息
     if (msg.text !== undefined && !msg.text.startsWith('/') && now - userState.lastTime > 60 * 1000) {
-      bot.sendMessage(chatId, welcomeMessage, mainMenu);
+      bot.sendMessage(chatId, WELCOME_MESSAGE, mainMenu);
       lastInteraction[chatId] = { lastTime: now, action: null };
     }
     // 檢查用戶是否處於等待輸入商品名稱的狀態
@@ -126,7 +140,7 @@ export function startBot() {
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     lastInteraction[chatId] = { lastTime: Date.now(), action: null };
-    bot.sendMessage(chatId, welcomeMessage, mainMenu);
+    bot.sendMessage(chatId, WELCOME_MESSAGE, mainMenu);
   });
 
   bot.on('callback_query', async (query) => {
@@ -159,7 +173,7 @@ export function startBot() {
 🎉 快來選購，與我們共慶十周年！🎉\n
 ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️\n`;
       await bot.sendMessage(chatId, resp);
-      await bot.sendMessage(chatId, recallMessage, mainMenu);
+      await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     } else if (data === 'button5') {
       const top5Json = await getJSON(`http://localhost:${process.env.SERVER_PORT}/top5Product`);
       let resp = `🌟✨ 周星星至hot產品介紹! ✨🌟\n(根據搜索次數由多至少排序)\n
@@ -170,7 +184,7 @@ export function startBot() {
 👍no5: ${top5Json.data[4].name}\n搜尋次數: ${top5Json.data[4].hot}\n
 \n`;
       await bot.sendMessage(chatId, resp);
-      await bot.sendMessage(chatId, recallMessage, mainMenu);
+      await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
     //呢個係確認已收取的callback
     await bot.answerCallbackQuery(query.id);
@@ -194,7 +208,7 @@ export function startBot() {
       console.error("Location handler error:", error);
       await bot.sendMessage(fromId, "處理位置時發生錯誤，請稍後再試。");
     }
-    await bot.sendMessage(fromId, recallMessage, mainMenu);
+    await bot.sendMessage(fromId, RECALL_MESSAGE, mainMenu);
   });
 
   async function handleQuestionCommand(chatId, input) {
@@ -214,7 +228,7 @@ export function startBot() {
       console.error("handleQuestionCommand: ", error);
       await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_QUESTIONS);
     }finally{
-      await bot.sendMessage(chatId, recallMessage, mainMenu);
+      await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
     
   }
@@ -256,10 +270,17 @@ export function startBot() {
         }
       }
     } catch (error) {
-      console.log("handleSearchCommand:", error);
-      await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_SEARCH);
+      // console.log("handleSearchCommand:", error);
+      // await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_SEARCH);
+      let errorMessage = ERROR_MESSAGES.SERVER_ERROR;
+      if (error.response) {
+        errorMessage = `API 請求失敗：${error.response.status}`;
+      } else if (error.name === 'TypeError') {
+        errorMessage = ERROR_MESSAGES.INVALID_INPUT;
+      }
+      await sendTips(bot, chatId, errorMessage, TIPS_SEARCH);
     }finally{
-    await bot.sendMessage(chatId, recallMessage, mainMenu);
+    await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
   }
 

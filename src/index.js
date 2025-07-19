@@ -36,11 +36,18 @@ app.get('/admin/question', (req, res) => {
 const port = process.env.SERVER_PORT || 8080;
 async function startApp() {
   try {
+    //20250718 增加環境變數啓動前測試
+    const requiredEnvVars = ['TELEGRAM_BOT_TOKEN', 'JWT_SECRET', 'DATABASE_NAME', 'SERVER_PORT'];
+    const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+    if (missingVars.length > 0) {
+      throw new Error(`缺少必要的環境變量: ${missingVars.join(', ')}`);
+    }
     await connectDB();
     startBot();
     app.listen(port, () => {
       console.log(`服務器: http://localhost:${port} 運行中`);
     });
+    
   } catch (err) {
     console.error('無法開啓該運用:', err);
   }

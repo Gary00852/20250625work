@@ -89,9 +89,9 @@ async function incrementHot(DB_id) {
     }
 }
 
-async function createOBJToDB(obj, collectionName) {
+async function insertIntoMongo(obj, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("createOBJToDB: schemas不存在");
+        console.log("insertIntoMongo: schemas不存在");
         return false;
     }
 
@@ -107,9 +107,9 @@ async function createOBJToDB(obj, collectionName) {
     }
 }
 
-async function updateOBJToDB(id, obj, collectionName) {
+async function updateInMongo(id, obj, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("updateOBJToDB: schemas不存在");
+        console.log("updateInMongo: schemas不存在");
         return false;
     }
 
@@ -131,9 +131,9 @@ async function updateOBJToDB(id, obj, collectionName) {
     }
 }
 
-async function delelteOBJToDB(id, collectionName) {
+async function deleteFromMongo(id, collectionName) {
     if (!schemas[collectionName]) {
-        console.log("delelteOBJToDB: schemas不存在");
+        console.log("deleteFromMongo: schemas不存在");
         return false;
     }
 
@@ -154,48 +154,29 @@ async function delelteOBJToDB(id, collectionName) {
         return false;
     }
 }
-//20250713 建立模型緩存 解決mongoose.model(collectionName, schema)，Mongoose 會拋出 OverwriteModelError 問題
-// const models = {};
 
-// function getModel(collectionName) {
-//     if (!schemas[collectionName]) {
-//         throw new Error(`Invalid collection name: ${collectionName}`);
-//     }
-//      if (!models[collectionName]) {
-//     models[collectionName] = mongoose.model(collectionName, schemas[collectionName], collectionName);
-//      }
-//     return models[collectionName];
-// }
-
-async function readJsonFromMongo(collectionName) {
+async function findInMongo(collectionName) {
     try {
      if (!schemas[collectionName]) {
         throw new Error(`錯誤的collectionName: ${collectionName}`);
      }       
-        // const Model = getModel(collectionName);
-        const Model = mongoose.model(collectionName, schemas[collectionName], collectionName)
+        const Model = getModel(collectionName);
+        //const Model = mongoose.model(collectionName, schemas[collectionName], collectionName)
         const data = await Model.find().lean();
         return JSON.stringify(data);
     } catch (error) {
-        console.error('readJsonFromMongo錯誤:', error);
+        console.error('findInMongo錯誤:', error);
         throw new Error(error.message);
     }
 }
 
-//20250709 初始化已棄用，
-// async function importJsonToMongo() {
-//   try {
-//     const productData = await fs.readFile('src/product.json', 'utf8');
-//     await mongoose.model('product', schemas["product"]).insertMany(JSON.parse(productData));
+//模型緩存邏輯，避免重複定義模型
+const models = {};
+function getModel(collectionName) {
+  if (!models[collectionName]) {
+    models[collectionName] = mongoose.model(collectionName, schemas[collectionName], collectionName);
+  }
+  return models[collectionName];
+}
 
-//     const shopData = await fs.readFile('src/shop.json', 'utf8');
-//     await mongoose.model('shop', schemas["shop"]).insertMany(JSON.parse(shopData));
-
-//     const questionData = await fs.readFile('src/question.json', 'utf8');
-//     await mongoose.model('question', schemas["question"]).insertMany(JSON.parse(questionData));
-//   } catch (error) {
-//     console.error("to mongo wrong", error);
-//   }
-// }
-
-export { readJsonFromMongo, checkAdminNameAndPassword, createOBJToDB, updateOBJToDB, delelteOBJToDB, connectDB, incrementHot };
+export { checkAdminNameAndPassword, connectDB, incrementHot ,findInMongo,deleteFromMongo,updateInMongo,insertIntoMongo};

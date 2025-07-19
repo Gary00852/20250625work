@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
-import { readJsonFromMongo, checkAdminNameAndPassword, createOBJToDB, updateOBJToDB, delelteOBJToDB } from './db.js';
+import { checkAdminNameAndPassword,findInMongo, insertIntoMongo, updateInMongo, deleteFromMongo } from './db.js';
 import Joi from "joi";
 
 dotenv.config();
@@ -32,32 +32,32 @@ const authorize = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;// Bearer + authorizationtoken
         if (authHeader === undefined || authHeader === null) {
-            return res.sendStatus(401);
+            return res.status(401).json({ 錯誤: '缺失授權頭' });
         }
         const token = authHeader.split(" ")[1];
         if (token == null)
-            return res.sendStatus(401);
+            return res.status(401).json({ 錯誤: '無效的令牌格式' });
 
         jwt.verify(token, process.env.JWT_SECRET, (err, userobj) => {
-            if (err)
-                return res.sendStatus(403);
-
+            if (err){
+                return res.status(403).json({ 錯誤: '令牌驗證失敗' });
+            }
             req.user = userobj;
             next();
-        })
+        });
     } catch (error) {
         console.log(error);
     }
 }
 
-// 20250712 增加Joi進行初步驗證資料和類型是否正確
+// 20250712 LOUIS：增加Joi進行初步驗證資料和類型是否正確
 const productSchema = Joi.object({
     name: Joi.string().required(),
     brand: Joi.string().required(),
     model: Joi.string().required(),
     description: Joi.string().required(),
     price_hkd: Joi.number().min(0).required(),
-    category_type: Joi.number().required(),
+    category_type: Joi.number().integer().min(1).max(4).required(),
     hot: Joi.number().required()
 })
 
@@ -66,8 +66,8 @@ const shopSchema = Joi.object({
     region: Joi.string().required(),
     district: Joi.string().required(),
     address: Joi.string().required(),
-    latitude: Joi.number().min(0).required(),
-    longitude: Joi.number().required(),
+    latitude: Joi.number().min(-90).max(90).required(),
+    longitude: Joi.number().min(-180).max(180).required(),
     phone: Joi.string().required(),
     opening_hours: Joi.string().required()
 })
@@ -77,7 +77,7 @@ const questionSchema = Joi.object({
     answer: Joi.string().required(),
 })
 
-//function
+//function add by sir
 export function havesineDistance(coords1, coords2, isMiles = false) {
     const toRad = x => x * Math.PI / 180;
     const lat1 = coords1.latitude;
@@ -97,7 +97,6 @@ export function havesineDistance(coords1, coords2, isMiles = false) {
 }
 
 
-
 //-------------------------Product-------------------------//
 // 20250712 product CRUD ( post / get / put / delete )
 
@@ -109,7 +108,7 @@ router.post("/product", authorize, async (req, res) => {
             console.log(error.details[0].message)
             return res.status(400).json({ 錯誤: error.details[0].message });
         }
-        const addOBj = await createOBJToDB(req.body, 'product');
+        const addOBj = await insertIntoMongo(req.body, 'product');
         if (addOBj) {
             res.status(201).send("增加商品成功");
         }
@@ -125,7 +124,7 @@ router.post("/product", authorize, async (req, res) => {
 // Product Read
 router.get("/product", async (req, res) => {
     try {
-        const readfile = await readJsonFromMongo("product");
+        const readfile = await findInMongo("product");
         res.end(readfile);
     } catch (error) {
         res.status(500).json({ "錯誤": "讀取商品錯誤" });
@@ -140,7 +139,7 @@ router.put("/product/:pid", authorize, async (req, res) => {
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
-        const updateOBJ = await updateOBJToDB(req.params.pid, req.body, 'product');
+        const updateOBJ = await updateInMongo(req.params.pid, req.body, 'product');
         if (updateOBJ) {
             res.status(201).send("更新商品成功");
         }
@@ -157,7 +156,7 @@ router.put("/product/:pid", authorize, async (req, res) => {
 // Product Delete (id使用db默認生成的_id)
 router.delete("/product/:pid", authorize, async (req, res) => {
     try {
-        const deleteOBJ = await delelteOBJToDB(req.params.pid, 'product');
+        const deleteOBJ = await deleteFromMongo(req.params.pid, 'product');
         if (deleteOBJ) {
             res.status(201).send("刪除商品成功");
         }
@@ -180,7 +179,7 @@ router.post("/shop", authorize, async (req, res) => {
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
-        const addOBj = await createOBJToDB(req.body, 'shop');
+        const addOBj = await insertIntoMongo(req.body, 'shop');
         if (addOBj) {
             res.status(201).send("增加商店成功");
         }
@@ -196,7 +195,7 @@ router.post("/shop", authorize, async (req, res) => {
 // Shop Read
 router.get("/shop", async (req, res) => {
     try {
-        const readfile = await readJsonFromMongo("shop");
+        const readfile = await findInMongo("shop");
         res.end(readfile);
     } catch (error) {
         res.status(500).json({ "錯誤": "讀取商店錯誤" });
@@ -211,7 +210,7 @@ router.put("/shop/:pid", authorize, async (req, res) => {
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
-        const updateOBJ = await updateOBJToDB(req.params.pid, req.body, 'shop');
+        const updateOBJ = await updateInMongo(req.params.pid, req.body, 'shop');
         if (updateOBJ) {
             res.status(201).send("更新商店成功");
         }
@@ -228,7 +227,7 @@ router.put("/shop/:pid", authorize, async (req, res) => {
 // Shop Delete (id使用db默認生成的_id)
 router.delete("/shop/:pid", authorize, async (req, res) => {
     try {
-        const deleteOBJ = await delelteOBJToDB(req.params.pid, 'shop');
+        const deleteOBJ = await deleteFromMongo(req.params.pid, 'shop');
         if (deleteOBJ) {
             res.status(201).send("刪除商店成功");
         }
@@ -251,7 +250,7 @@ router.post("/question", authorize, async (req, res) => {
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
-        const addOBj = await createOBJToDB(req.body, 'question');
+        const addOBj = await insertIntoMongo(req.body, 'question');
         if (addOBj) {
             res.status(201).send("增加問題成功");
         }
@@ -267,7 +266,7 @@ router.post("/question", authorize, async (req, res) => {
 // Question Read
 router.get("/question", async (req, res) => {
     try {
-        const readfile = await readJsonFromMongo("question");
+        const readfile = await findInMongo("question");
         res.end(readfile);
     } catch (error) {
         res.status(500).json({ "錯誤": "讀取問題錯誤" });
@@ -282,7 +281,7 @@ router.put("/question/:pid", authorize, async (req, res) => {
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
         }
-        const updateOBJ = await updateOBJToDB(req.params.pid, req.body, 'question');
+        const updateOBJ = await updateInMongo(req.params.pid, req.body, 'question');
         if (updateOBJ) {
             res.status(201).send("更新問題成功");
         }
@@ -299,7 +298,7 @@ router.put("/question/:pid", authorize, async (req, res) => {
 // Question Delete (id使用db默認生成的_id)
 router.delete("/question/:pid", authorize, async (req, res) => {
     try {
-        const deleteOBJ = await delelteOBJToDB(req.params.pid, 'question');
+        const deleteOBJ = await deleteFromMongo(req.params.pid, 'question');
         if (deleteOBJ) {
             res.status(201).send("刪除問題成功");
         }
@@ -313,7 +312,7 @@ router.delete("/question/:pid", authorize, async (req, res) => {
     }
 })
 
-// search name minprice maxprice
+// 以關鍵詞同價格區間查詢
 router.get('/search/:param1/:param2/:param3', async (req, res) => {
     try {
         const { param1: keyword, param2: minprice, param3: maxprice } = req.params;
@@ -325,7 +324,7 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
             return [];
         }
 
-        const productString = await readJsonFromMongo("product");
+        const productString = await findInMongo("product");
         let productJSON = JSON.parse(productString);
         const result = productJSON.filter((data) => {
             return (
@@ -335,7 +334,10 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
                 data.price_hkd <= maxPriceNum
             );
         });
-
+        if (result.length === 0) {
+            res.status(404).json({ 錯誤: "沒有找到前五數據" });
+            return [];
+        }
         res.json(result);
     } catch (error) {
         console.error(error.message);
@@ -343,11 +345,11 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
     }
 });
 
-//search api only name
+//以關鍵詞查詢商品
 router.get('/search/:param1', async (req, res) => {
     try {
         const { param1: keyword } = req.params;
-        const productString = await readJsonFromMongo("product");
+        const productString = await findInMongo("product");
         let productJSON = JSON.parse(productString);
         const result = productJSON.filter((data) => {
             return (
@@ -363,11 +365,11 @@ router.get('/search/:param1', async (req, res) => {
     }
 })
 
-//question api only name
+//以關鍵詞查詢答案
 router.get('/question/:param1', async (req, res) => {
     try {
         const { param1: keyword } = req.params;
-        const questionString = await readJsonFromMongo("question");
+        const questionString = await findInMongo("question");
         let questionJSON = JSON.parse(questionString);
         const result = questionJSON.filter((data) => {
             return (
@@ -382,57 +384,46 @@ router.get('/question/:param1', async (req, res) => {
     }
 })
 
-// location
-router.get("/location/:param1/:param2", async (req, res) => {
-    try {
-        const { param1, param2 } = req.params;
-        const latitude = parseFloat(param1);
-        const longitude = parseFloat(param2);
+// location 20250718 合為中間件
+const validateLatLong = (req, res, next) => {
+  const { param1, param2 } = req.params;
+  const latitude = parseFloat(param1);
+  const longitude = parseFloat(param2);
 
-        if (
-            isNaN(latitude) ||
-            isNaN(longitude) ||
-            !isFinite(latitude) ||
-            !isFinite(longitude) ||
-            latitude < -90 ||
-            latitude > 90 ||
-            longitude < -180 ||
-            longitude > 180
-        ) {
-            return res.status(400).json({ 錯誤: "輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180" });
-        }
+  if (
+    isNaN(latitude) ||
+    isNaN(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return res.status(400).json({ 錯誤: '輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180' });
+  }
+  req.coords = { latitude, longitude };
+  next();
+};
 
-        const shopString = await readJsonFromMongo("shop");
-        let shopJSON = JSON.parse(shopString);
-
-        if (!Array.isArray(shopJSON)) {
-            return res.status(500).json({ 錯誤: "商店資料格式錯誤，應為陣列" });
-        }
-
-        const coords1 = { latitude, longitude };
-        const result = shopJSON.filter((shop) => {
-            const shopLat = parseFloat(shop.latitude);
-            const shopLon = parseFloat(shop.longitude);
-
-            if (isNaN(shopLat) || isNaN(shopLon) || !isFinite(shopLat) || !isFinite(shopLon)) {
-                return {};
-            }
-
-            const coords2 = { latitude: shopLat, longitude: shopLon };
-            return havesineDistance(coords1, coords2) <= 2;
-        });
-
-        res.json(result);
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ 錯誤: "獲取附近商店資料錯誤" });
-    }
+//查詢附近商店
+router.get('/location/:param1/:param2', validateLatLong, async (req, res) => {
+  try {
+    const shopString = await findInMongo('shop');
+    const shopJSON = JSON.parse(shopString);
+    const result = shopJSON.filter((shop) => {
+      const coords2 = { latitude: parseFloat(shop.latitude), longitude: parseFloat(shop.longitude) };
+      return havesineDistance(req.coords, coords2) <= 2;
+    });
+    res.json(result);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ 錯誤: '獲取附近商店資料錯誤' });
+  }
 });
 
-//top5 product
+//商品前五物品篩選
 router.get('/top5Product', async (req, res) => {
     try {
-        const productString = await readJsonFromMongo("product");
+        const productString = await findInMongo("product");
         let productJSON = JSON.parse(productString);
         const top5Product = productJSON.sort((a, b) => b.hot - a.hot).slice(0, 5)
         res.json(top5Product);
@@ -442,33 +433,8 @@ router.get('/top5Product', async (req, res) => {
     }
 })
 
-//   const { keyword, minprice, maxprice } = req.params;
-//   const productString= await readJsonFromMongo("product");
-//   const productJSON = JSON.parse(productString);
-//   console.log(typeof productJSON)
-//     let result = productJSON.data.filter((data) => {
-//     return (
-//     data.name.replace(/\s+/, "").toLowerCase().indexOf(keyword) != -1 &&
-//     data.price_hkd >= minprice &&data.price_hkd <= maxprice
-//     );
-//     });
-//  res.end(result);
-//   console.log(param1, param2, param3);
-//res.send(`Parameters: ${param1}, ${param2}, ${param3}`);
-//});
-
-//product.json -> mongoDB product 會覆蓋新舊資料
-// router.get("/initmongo", async (req, res) => {
-//     try {
-//         await importJsonToMongo();
-//     } catch (error) {
-//         console.log("json to mongo fail.")
-//         console.log(error)
-//     }
-// })
-
 router.post("/login", authenticate, (req, res) => {
-    const token = jwt.sign(req.user, process.env.JWT_SECRET, { "expiresIn": "88888h" })
+    const token = jwt.sign(req.user, process.env.JWT_SECRET, { "expiresIn": "1h" })
     res.json({ token });
 })
 
