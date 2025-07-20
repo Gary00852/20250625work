@@ -120,7 +120,7 @@ async function updateInMongo(id, obj, collectionName) {
         const result = await User.findByIdAndUpdate(id, newObj);
         if (!result || result == null) {
             return { success: false, message: "修改對象不存在或錯誤" };
-        }
+        } 
         else {
            // console.log('修改對象完畢', result);
             return { success: true, message: "修改成功", data: result };

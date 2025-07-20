@@ -223,18 +223,20 @@ export function startBot() {
         let fixinput = input.replace(/\s+/, "").toLowerCase();
         let questionJSON = await getJSON(`http://localhost:${process.env.SERVER_PORT}/question/${fixinput}`);
         if (questionJSON.data.length > 0) {
+          await bot.sendMessage(chatId, `合共找到${questionJSON.data.length}個相關資料:`);
           await printoutQuestion(questionJSON.data, bot, chatId);
         } else {
           await sendTips(bot, chatId, "🙅‍♀️找不到相關問題資料", TIPS_QUESTIONS);
         }
       }
+      // 在所有訊息發送完畢後發送 RECALL_MESSAGE
+      await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     } catch (error) {
       console.error("handleQuestionCommand: ", error);
       await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_QUESTIONS);
-    } finally {
+      // 在錯誤情況下也發送 RECALL_MESSAGE
       await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
-
   }
 
   bot.onText(/\/question(?:\s+(\S+))?/, async (msg, match) => {
@@ -252,31 +254,35 @@ export function startBot() {
         if (minPriceStr || maxPriceStr) {
           const minPrice = parseInt(minPriceStr, 10);
           const maxPrice = parseInt(maxPriceStr, 10);
-          if (Number.isNaN(minPrice) || Number.isNaN(maxPrice))
+          if (Number.isNaN(minPrice) || Number.isNaN(maxPrice) || minPrice < 0 || maxPrice < 0) {
             await sendTips(bot, chatId, "🙅‍♀️請正確輸入 最低價 和 最高價", TIPS_SEARCH);
-          else if (maxPrice < minPrice)
+          } else if (maxPrice < minPrice) {
             await sendTips(bot, chatId, "🙅‍♀️最高價不能小於最低價", TIPS_SEARCH);
-          else {
+          } else {
             const searchJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/search/${keyword}/${minPriceStr}/${maxPriceStr}`);
             if (searchJson.data.length > 0) {
+              await bot.sendMessage(chatId, `合共找到${searchJson.data.length}個相關資料:`);
               await printoutProduct(searchJson.data, bot, chatId);
             } else {
-              await sendTips(bot, chatId, "🙅‍♀️找不到相關資料", TIPS_SEARCH);
+              await sendTips(bot, chatId, "🙅‍♀️找不到相關商品資料", TIPS_SEARCH);
             }
           }
         } else {
           const searchJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/search/${keyword}`);
           if (searchJson.data.length > 0) {
+            await bot.sendMessage(chatId, `合共找到${searchJson.data.length}個相關資料:`);
             await printoutProduct(searchJson.data, bot, chatId);
           } else {
-            await sendTips(bot, chatId, "🙅‍♀️找不到相關資料", TIPS_SEARCH);
+            await sendTips(bot, chatId, "🙅‍♀️找不到相關商品資料", TIPS_SEARCH);
           }
         }
       }
+      // 在所有訊息發送完畢後發送 RECALL_MESSAGE
+      await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     } catch (error) {
       console.error("handleSearchCommand:", error);
-     // await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_SEARCH);
-    } finally {
+      await sendTips(bot, chatId, "🙅‍♀️發生錯誤，請稍後再試", TIPS_SEARCH);
+      // 在錯誤情況下也發送 RECALL_MESSAGE
       await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     }
   }
