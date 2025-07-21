@@ -34,9 +34,9 @@
       </div>
       <h2 class="text-2xl font-semibold mb-4 text-center">請選擇需要操作的選項</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-        <a href="/admin/product" class="bg-green-500 text-white p-4 rounded text-center hover:bg-green-600">管理物品</a>
+        <a href="/admin/product" class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">管理物品</a>
         <a href="/admin/shop" class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">管理商鋪</a>
-        <a href="/admin/question" class="bg-red-500 text-white p-4 rounded text-center hover:bg-red-600">管理問答</a>
+        <a href="/admin/question" class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">管理問答</a>
       </div>
     </div>
   </div>
@@ -98,6 +98,7 @@
     window.onload = () => {
       token = localStorage.getItem('token');
       if (token) {
+        displayUsername();
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('navigation-section').classList.remove('hidden');
       }
