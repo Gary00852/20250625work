@@ -21,18 +21,24 @@
 
     <!-- Shop Form -->
     <div class="bg-white p-6 rounded shadow-md mb-8">
-      <h2 class="text-2xl font-semibold mb-4">添加/修改 商鋪</h2>
+      <h2 id="form-title" class="text-2xl font-semibold mb-4">新增店鋪</h2>
       <input id="shop-id" type="hidden">
 
-      <input id="shop-name" type="text" placeholder="Name" class="w-full p-2 mb-2 border rounded">
-      <input id="shop-region" type="text" placeholder="Region" class="w-full p-2 mb-2 border rounded">
-      <input id="shop-district" type="text" placeholder="District" class="w-full p-2 mb-2 border rounded">
-      <input id="shop-address" type="text" placeholder="Address" class="w-full p-2 mb-2 border rounded">
-      <input id="shop-latitude" type="number" placeholder="Latitude" class="w-full p-2 mb-2 border rounded">
-      <input id="shop-longitude" type="number" placeholder="Longitude" class="w-full p-2 mb-2 border rounded">
-      <input id="shop-phone" type="text" placeholder="Phone" class="w-full p-2 mb-2 border rounded">
-      <input id="shop-opening_hours" type="text" placeholder="Opening Hours" class="w-full p-2 mb-2 border rounded">
-      <button onclick="saveShop()" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">建立/保存修改</button>
+      <input id="shop-name" type="text" placeholder="Name" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-region" type="text" placeholder="Region" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-district" type="text" placeholder="District" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-address" type="text" placeholder="Address" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-latitude" type="number" placeholder="Latitude" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-longitude" type="number" placeholder="Longitude" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-phone" type="text" placeholder="Phone" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-phone" type="text" placeholder="Phone" class="w-full p-2 mb-2 border rounded" required>
+      <div class="flex space-x-4">
+        <button id="btn-create" onclick="createProduct()"
+          class="flex-1 bg-green-500 text-white p-2 rounded hover:bg-green-600">建立</button>
+        <button id="btn-update" onclick="updateProduct()"
+          class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 hidden">确认修改</button>
+        <button onclick="cancelEdit()" class="flex-1 bg-gray-400 text-white p-2 rounded hover:bg-gray-500">取消</button>
+      </div>
     </div>
 
     <!-- Search and Shop List -->
@@ -79,7 +85,31 @@
       const usernameElement = document.getElementById('username');
       usernameElement.textContent = decoded.username || 'User';
     }
-
+    /* ---------- 模式切換 ---------- */
+    function setCreateMode() {
+      document.getElementById('form-title').textContent = '新增店鋪';
+      document.getElementById('btn-create').classList.remove('hidden');
+      document.getElementById('btn-update').classList.add('hidden');
+      document.getElementById('shop-id').value = '';
+      document.querySelectorAll('#shop-name, #shop-region, #shop-district, #shop-address, #shop-latitude, #shop-longitude, #shop-phone,#shop-openhours')
+        .forEach(el => el.value = '');
+    }
+    function setEditMode(item) {
+      document.getElementById('form-title').textContent = '修改店鋪';
+      document.getElementById('btn-create').classList.add('hidden');
+      document.getElementById('btn-update').classList.remove('hidden');
+      document.getElementById('shop-id').value = item._id;
+      document.getElementById('shop-name').value = item.name;
+      document.getElementById('shop-region').value = item.region;
+      document.getElementById('shop-district').value = item.district;
+      document.getElementById('shop-address').value = item.address;
+      document.getElementById('shop-latitude').value = item.latitude;
+      document.getElementById('shop-longitude').value = item.longitude;
+      document.getElementById('shop-phone').value = item.phone;
+      document.getElementById('shop-openhours').value = item.opening_hours;
+    }
+    function cancelEdit() { setCreateMode(); }
+	
     // Load data
     async function loadData() {
       try {
@@ -113,7 +143,7 @@
           <span>${item.name}</span>
           <div>
             <button onclick="editItem('${item._id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">修改</button>
-            <button onclick="deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
+            <button onclick="if(confirm('確定要刪除這個物品嗎？')) deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
           </div>
         `;
         list.appendChild(div);
@@ -130,6 +160,7 @@
       try {
         const item = allItems.find(i => i._id === id);
         if (item) {
+          setEditMode(item);
           document.getElementById(`${collection}-id`).value = id;
           Object.keys(item).forEach(key => {
             if (key !== '_id') {
@@ -146,37 +177,55 @@
 
     // Delete item
     async function deleteItem(id) {
+	
       try {
         const response = await fetch(`/${collection}/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (response.status === 201) {
-          alert(`${collection} deleted successfully`);
+		
+        if (response.status === 200) {
+          alert(`${collection} 刪除完畢`);
           loadData();
         } else {
-          alert(`Failed to delete ${collection}`);
+          alert(`刪除錯誤 ${collection}`);
         }
       } catch (error) {
         console.error(`Error deleting ${collection}:`, error);
       }
     }
 
-    // Save shop
-    async function saveShop() {
-      const id = document.getElementById('shop-id').value;
-      const data = {
-        name: document.getElementById('shop-name').value,
-        region: document.getElementById('shop-region').value,
-        district: document.getElementById('shop-district').value,
-        address: document.getElementById('shop-address').value,
+ /* ---------- 表單處理 ---------- */
+    function getFormData() {
+      return {
+        name: document.getElementById('shop-name').value.trim(),
+        region: document.getElementById('shop-region').value.trim(),
+        district: document.getElementById('shop-district').value.trim(),
+        address: document.getElementById('shop-address').value.trim(),
         latitude: Number(document.getElementById('shop-latitude').value),
         longitude: Number(document.getElementById('shop-longitude').value),
-        phone: document.getElementById('shop-phone').value,
-        opening_hours: document.getElementById('shop-opening_hours').value
+        phone: document.getElementById('shop-phone').value.trim()
       };
-      saveItem(id, data);
     }
+    function validateForm() {
+      const data = getFormData();
+      const ok = Object.values(data).every(v => v !== '' && !Number.isNaN(v));
+      if (!ok) alert('請填寫所有必填欄位');
+      return ok;
+    }
+    async function createProduct() {
+      if (!validateForm()) return;
+      await saveItem(null, getFormData());
+      console.log(getFormData())
+      setCreateMode();
+    }
+    async function updateProduct() {
+      const id = document.getElementById('shop-id').value;
+      if (!id || !validateForm()) return;
+      await saveItem(id, getFormData());
+      setCreateMode();
+    }
+
 
     // Generic save function
     async function saveItem(id, data) {
@@ -191,7 +240,8 @@
           },
           body: JSON.stringify(data)
         });
-        if (response.status === 201) {
+        console.log(response.status)
+        if (response.status === 201 || response.status === 200) {
           alert(`${collection} ${id ? 'updated' : 'created'} successfully`);
           loadData();
           document.querySelectorAll(`#${collection}-form input, #${collection}-form textarea`).forEach(input => input.value = '');

@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
-import { checkAdminNameAndPassword, findInMongo, insertIntoMongo, updateInMongo, deleteFromMongo } from './db.js';
+import { checkAdminNameAndPassword, findInMongo, insertIntoMongo, updateInMongo, deleteFromMongo, getModel } from './db.js';
 import Joi from "joi";
 
 dotenv.config();
@@ -311,24 +311,14 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
         const minPriceNum = Number(minprice);
         const maxPriceNum = Number(maxprice);
 
-        if (isNaN(minPriceNum) || isNaN(maxPriceNum)) {
+        if (isNaN(minPriceNum) || isNaN(maxPriceNum) || minPriceNum > maxPriceNum || maxPriceNum < 0|| minPriceNum < 0) {
             res.status(400).json({ error: '請輸入正確的最低和最高價格' });
-            return [];
         }
+        const Model = getModel('product');
+        const result = await Model.find({ name: { $regex: keyword, $options: 'i' }, price_hkd: { $gte: minPriceNum, $lte: maxPriceNum } });
 
-        const productString = await findInMongo("product");
-        let productJSON = JSON.parse(productString);
-        const result = productJSON.filter((data) => {
-            return (
-                data.name &&
-                data.name.replace(/\s+/g, "").toLowerCase().includes(keyword.toLowerCase()) &&
-                data.price_hkd >= minPriceNum &&
-                data.price_hkd <= maxPriceNum
-            );
-        });
         if (result.length === 0) {
-            res.status(404).json({ error: "沒有找到前五數據" });
-            return [];
+            res.status(404).json({ error: "沒有找到相關資料" });
         }
         res.json(result);
     } catch (error) {
@@ -341,15 +331,11 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
 router.get('/search/:param1', async (req, res) => {
     try {
         const { param1: keyword } = req.params;
-        const productString = await findInMongo("product");
-        let productJSON = JSON.parse(productString);
-        const result = productJSON.filter((data) => {
-            return (
-                data.name &&
-                data.name.replace(/\s+/g, "").toLowerCase().includes(keyword.toLowerCase())
-            );
-        });
-
+        const Model = getModel('product');
+        const result = await Model.find({ name: { $regex: keyword, $options: 'i' } });
+        if (result.length === 0) {
+            res.status(404).json({ error: "沒有找到相關資料" });
+        }
         res.json(result);
     } catch (error) {
         console.error(error.message);
@@ -361,14 +347,8 @@ router.get('/search/:param1', async (req, res) => {
 router.get('/question/:param1', async (req, res) => {
     try {
         const { param1: keyword } = req.params;
-        const questionString = await findInMongo("question");
-        let questionJSON = JSON.parse(questionString);
-        const result = questionJSON.filter((data) => {
-            return (
-                data.question && data.question.replace(/\s+/g, "").toLowerCase().includes(keyword.toLowerCase())
-            );
-        });
-
+        const Model = getModel('question');
+        const result = await Model.find({ question: { $regex: keyword, $options: 'i' }});
         res.json(result);
     } catch (error) {
         console.error(error.message);

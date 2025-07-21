@@ -39,7 +39,7 @@
         <button id="btn-create" onclick="createProduct()"
           class="flex-1 bg-green-500 text-white p-2 rounded hover:bg-green-600">建立</button>
         <button id="btn-update" onclick="updateProduct()"
-          class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 hidden">儲存修改</button>
+          class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 hidden">确认修改</button>
         <button onclick="cancelEdit()" class="flex-1 bg-gray-400 text-white p-2 rounded hover:bg-gray-500">取消</button>
       </div>
     </div>
@@ -131,7 +131,8 @@
     async function deleteItem(id) {
       try {
         const res = await fetch(`/${collection}/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-        if (res.status === 200) { alert('刪除成功'); loadData(); }
+        if (res.status === 200) 
+          { alert('刪除成功'); loadData(); }
         else alert('刪除失敗');
       } catch (e) { console.error(e); }
     }
@@ -174,7 +175,10 @@
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(data)
         });
-        if (res.status === 200) { alert(`${id ? '更新' : '建立'}成功`); loadData(); }
+        if (res.status === 200) { 
+          alert(`${id ? '更新' : '建立'}成功`); 
+          loadData(); 
+        }
         else alert('操作失敗');
       } catch (e) { console.error(e); }
     }

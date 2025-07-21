@@ -260,6 +260,7 @@ export function startBot() {
             await sendTips(bot, chatId, "🙅‍♀️最高價不能小於最低價", TIPS_SEARCH);
           } else {
             const searchJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/search/${keyword}/${minPriceStr}/${maxPriceStr}`);
+            console.log("bot:",searchJson)
             if (searchJson.data.length > 0) {
               await bot.sendMessage(chatId, `合共找到${searchJson.data.length}個相關資料:`);
               await printoutProduct(searchJson.data, bot, chatId);

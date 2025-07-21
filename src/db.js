@@ -149,7 +149,7 @@ async function deleteFromMongo(id, collectionName) {
 
     } catch (error) {
         console.error('刪除對象失敗:', error);
-        return { success: false, message: "刪除對象失敗" };;
+        return { success: false, message: "刪除對象失敗" };
     }
 }
 
@@ -177,4 +177,4 @@ function getModel(collectionName) {
     return models[collectionName];
 }
 
-export { checkAdminNameAndPassword, connectDB, incrementHot, findInMongo, deleteFromMongo, updateInMongo, insertIntoMongo };
+export { checkAdminNameAndPassword, connectDB, incrementHot, findInMongo, deleteFromMongo, updateInMongo, insertIntoMongo,getModel };

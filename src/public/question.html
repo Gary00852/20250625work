@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理問答</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 font-sans">
   <div class="container mx-auto p-4">
     <!-- Header with Username and Logout -->
     <div class="flex justify-between items-center mb-6">
-	<a href="/admin"class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">← 後退</a>
+      <a href="/admin" class="bg-blue-500 text-white p-4 rounded text-center hover:bg-blue-600">← 後退</a>
       <h1 class="text-3xl font-bold">問答管理</h1>
       <div class="flex items-center space-x-4">
         <span id="username" class="text-lg font-semibold"></span>
@@ -21,17 +23,26 @@
 
     <!-- Question Form -->
     <div class="bg-white p-6 rounded shadow-md mb-8">
-      <h2 class="text-2xl font-semibold mb-4">添加/修改 問答</h2>
+      <h2 id="form-title" class="text-2xl font-semibold mb-4">新增問答</h2>
       <input id="question-id" type="hidden">
-      <input id="question-question" type="text" placeholder="Question" class="w-full p-2 mb-2 border rounded">
-      <input id="question-answer" type="text" placeholder="Answer" class="w-full p-2 mb-2 border rounded">
-      <button onclick="saveQuestion()" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">建立/保存修改</button>
+      <input id="question-question" type="text" placeholder="Question" class="w-full p-2 mb-2 border rounded"
+        required />
+      <input id="question-answer" type="text" placeholder="Answer" class="w-full p-2 mb-2 border rounded" required />
+      <div class="flex space-x-4">
+        <button id="btn-create" onclick="createProduct()"
+          class="flex-1 bg-green-500 text-white p-2 rounded hover:bg-green-600">建立</button>
+        <button id="btn-update" onclick="updateProduct()"
+          class="flex-1 bg-blue-500 text-white p-2 rounded hover:bg-blue-600 hidden">确认修改</button>
+        <button onclick="cancelEdit()" class="flex-1 bg-gray-400 text-white p-2 rounded hover:bg-gray-500">取消</button>
+      </div>
+
     </div>
 
     <!-- Search and Question List -->
     <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-4">列表</h2>
-      <input id="question-search" type="text" placeholder="請輸入想搜尋的關鍵字" class="w-full p-2 mb-4 border rounded" oninput="searchItems()">
+      <input id="question-search" type="text" placeholder="請輸入想搜尋的關鍵字" class="w-full p-2 mb-4 border rounded"
+        oninput="searchItems()">
       <div id="question-list" class="mt-4"></div>
     </div>
   </div>
@@ -65,8 +76,27 @@
       localStorage.removeItem('token');
       window.location.href = '/admin';
     }
+    /* ---------- 模式切換 ---------- */
+    function setCreateMode() {
+      document.getElementById('form-title').textContent = '新增問答';
+      document.getElementById('btn-create').classList.remove('hidden');
+      document.getElementById('btn-update').classList.add('hidden');
+      document.getElementById('question-id').value = '';
+      // document.getElementById('question-question').value = '';
+      // document.getElementById('question-answer').value = '';
+      document.querySelectorAll('#question-question, #question-answer')
+        .forEach(el => el.value = '');
+    }
+    function setEditMode(item) {
+      document.getElementById('form-title').textContent = '修改問答';
+      document.getElementById('btn-create').classList.add('hidden');
+      document.getElementById('btn-update').classList.remove('hidden');
+      document.getElementById('question-id').value = item._id;
+      document.getElementById('question-question').value = item.question;
+      document.getElementById('question-answer').value = item.answer;
+    }
+    function cancelEdit() { setCreateMode(); }
 
-    // Display username
     function displayUsername() {
       const decoded = jwtDecode(token);
       const usernameElement = document.getElementById('username');
@@ -94,7 +124,7 @@
     // Render items (limited to 15, filtered by search)
     function renderItems(items) {
       const searchQuery = document.getElementById(`${collection}-search`).value.toLowerCase();
-      const filteredItems = items.filter(item => 
+      const filteredItems = items.filter(item =>
         item.question && item.question.toLowerCase().includes(searchQuery)
       )
       const list = document.getElementById(`${collection}-list`);
@@ -105,8 +135,8 @@
         div.innerHTML = `
           <span>${item.question}</span>
           <div>
-            <button onclick="editItem('${item._id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">Edit</button>
-            <button onclick="deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+            <button onclick="editItem('${item._id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">修改</button>
+            <button onclick="if(confirm('確定要刪除這個物品嗎？')) deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
           </div>
         `;
         list.appendChild(div);
@@ -123,11 +153,12 @@
       try {
         const item = allItems.find(i => i._id === id);
         if (item) {
+          setEditMode(item);
           document.getElementById(`${collection}-id`).value = id;
           Object.keys(item).forEach(key => {
             if (key !== '_id') {
               const input = document.getElementById(`${collection}-${key}`);
-              if (input) 
+              if (input)
                 input.value = item[key];
             }
           });
@@ -144,27 +175,49 @@
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (response.status === 201) {
-          alert(`${collection} deleted successfully`);
-          loadData();
-        } else {
-          alert(`Failed to delete ${collection}`);
-        }
+        if (response.status === 200) 
+           { alert('刪除成功'); loadData(); }
+        else 
+          alert('刪除失敗');
       } catch (error) {
         console.error(`Error deleting ${collection}:`, error);
       }
     }
+       /* ---------- 表單處理 ---------- */
+    function getFormData() {
+      return {
+        question: document.getElementById('question-question').value.trim(),
+        answer: document.getElementById('question-answer').value.trim(),
+      };
+    } 
+    function validateForm() {
+      const data = getFormData();
+      const ok = Object.values(data).every(v => v !== '' && !Number.isNaN(v));
+      if (!ok) alert('請填寫所有必填欄位');
+      return ok;
+    }
+    async function createProduct() {
+      if (!validateForm()) return;
+      await saveItem(null, getFormData());
+      setCreateMode();
+    }
+    async function updateProduct() {
+      const id = document.getElementById('question-id').value;
+      if (!id || !validateForm()) return;
+      await saveItem(id, getFormData());
+      setCreateMode();
+    }
 
     // Save question
-    async function saveQuestion() {
-      const id = document.getElementById('question-id').value;
-      const data = {
+    // async function saveQuestion() {
+    //   const id = document.getElementById('question-id').value;
+    //   const data = {
 
-        question: document.getElementById('question-question').value,
-        answer: document.getElementById('question-answer').value
-      };
-      saveItem(id, data);
-    }
+    //     question: document.getElementById('question-question').value,
+    //     answer: document.getElementById('question-answer').value
+    //   };
+    //   saveItem(id, data);
+    // }
 
     // Generic save function
     async function saveItem(id, data) {
@@ -179,13 +232,13 @@
           },
           body: JSON.stringify(data)
         });
-        if (response.status === 201) {
-          alert(`${collection} ${id ? 'updated' : 'created'} successfully`);
+        if (response.status === 201 || response.status === 200) {
+          alert(`問答 ${id ? '更新' : '建立'} 成功`);
           loadData();
           document.querySelectorAll(`#${collection}-form input, #${collection}-form textarea`).forEach(input => input.value = '');
           document.getElementById(`${collection}-id`).value = '';
         } else {
-          alert(`Failed to ${id ? 'update' : 'create'} ${collection}`);
+          alert(`錯誤 ${id ? '更新' : '建立'} `);
         }
       } catch (error) {
         console.error(`Error saving ${collection}:`, error);
@@ -199,4 +252,5 @@
     };
   </script>
 </body>
+
 </html>
