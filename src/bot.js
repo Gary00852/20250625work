@@ -2,7 +2,6 @@ import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
 import axios from "axios";
 import { havesineDistance } from './api.js';
-import { incrementHot } from './db.js';
 
 dotenv.config();
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
@@ -46,10 +45,6 @@ const sendTips = (bot, chatId, extraMessage = "", TIPS_MESSAGE = "") => {
   bot.sendMessage(chatId, `${extraMessage ? `\n 結果: ${extraMessage}\n` : ""}${TIPS_MESSAGE}`);
 };
 
-//函數位置
-async function getJSON(url) {
-  return await axios.get(url);
-}
 
 async function printoutQuestion(court, bot, fromId) {
   for (const item of court) {
@@ -61,7 +56,8 @@ async function printoutQuestion(court, bot, fromId) {
 
 async function printoutProduct(court, bot, fromId) {
   for (const item of court) {
-    incrementHot(item._id)
+    const _id = item._id;
+    await axios.post(`http://localhost:${process.env.SERVER_PORT}/incrementHot`, { _id });
     let resp = `📍名稱: ${item.name}\n`;
     resp += `🌟型號: ${item.model}\n`;
     resp += `🎉價格: HKD ${item.price_hkd}\n`;
@@ -175,7 +171,7 @@ export function startBot() {
       await bot.sendMessage(chatId, resp);
       await bot.sendMessage(chatId, RECALL_MESSAGE, mainMenu);
     } else if (data === 'button5') {
-      const top5Json = await getJSON(`http://localhost:${process.env.SERVER_PORT}/top5Product`);
+      const top5Json = await axios.get(`http://localhost:${process.env.SERVER_PORT}/top5Product`);
       let resp = "抱歉，該功能出現少少問題，會於稍後進行修復。"
       if (top5Json.data.length == 5) {
         resp = `🌟✨ 周星星至hot產品介紹! ✨🌟\n(根據搜索次數由多至少排序)\n
@@ -201,7 +197,7 @@ export function startBot() {
   bot.on('location', async (msg) => {
     const fromId = msg.from.id;
     try {
-      const locationJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/location/${msg.location.latitude}/${msg.location.longitude}`);
+      const locationJson = await axios.get(`http://localhost:${process.env.SERVER_PORT}/location/${msg.location.latitude}/${msg.location.longitude}`);
       if (locationJson.data.length > 0) {
         await bot.sendMessage(fromId, "以下為指定地點附近的店鋪：(<=2KM)");
         await printoutShop(locationJson.data, bot, fromId, msg.location.latitude, msg.location.longitude);
@@ -221,7 +217,7 @@ export function startBot() {
         await sendTips(bot, chatId, "🙅‍♀️請輸入問題關鍵詞", TIPS_QUESTIONS);
       } else {
         let fixinput = input.replace(/\s+/, "").toLowerCase();
-        let questionJSON = await getJSON(`http://localhost:${process.env.SERVER_PORT}/question/${fixinput}`);
+        let questionJSON = await axios.get(`http://localhost:${process.env.SERVER_PORT}/question/${fixinput}`);
         if (questionJSON.data.length > 0) {
           await bot.sendMessage(chatId, `合共找到${questionJSON.data.length}個相關資料:`);
           await printoutQuestion(questionJSON.data, bot, chatId);
@@ -259,17 +255,17 @@ export function startBot() {
           } else if (maxPrice < minPrice) {
             await sendTips(bot, chatId, "🙅‍♀️最高價不能小於最低價", TIPS_SEARCH);
           } else {
-            const searchJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/search/${keyword}/${minPriceStr}/${maxPriceStr}`);
-            console.log("bot:",searchJson)
+            const searchJson = await axios.get(`http://localhost:${process.env.SERVER_PORT}/search/${keyword}/${minPriceStr}/${maxPriceStr}`);
             if (searchJson.data.length > 0) {
               await bot.sendMessage(chatId, `合共找到${searchJson.data.length}個相關資料:`);
               await printoutProduct(searchJson.data, bot, chatId);
+              
             } else {
               await sendTips(bot, chatId, "🙅‍♀️找不到相關商品資料", TIPS_SEARCH);
             }
           }
         } else {
-          const searchJson = await getJSON(`http://localhost:${process.env.SERVER_PORT}/search/${keyword}`);
+          const searchJson = await axios.get(`http://localhost:${process.env.SERVER_PORT}/search/${keyword}`);
           if (searchJson.data.length > 0) {
             await bot.sendMessage(chatId, `合共找到${searchJson.data.length}個相關資料:`);
             await printoutProduct(searchJson.data, bot, chatId);

@@ -74,21 +74,6 @@ async function checkAdminNameAndPassword(username, password) {
     }
 }
 
-// 討論增加的一個遞加的功能
-async function incrementHot(DB_id) {
-    //const User = mongoose.model('product', schemas['product'], 'product');
-    const User = getModel('product');
-    try {
-        await User.findByIdAndUpdate(
-            DB_id,
-            { $inc: { hot: 1 } }, // $inc 遞增 hot
-            { new: true }
-        )
-    } catch (error) {
-        console.error('自增加失敗:', error);
-    }
-}
-
 // 20250719 以下更新為類json錯誤傳送方式
 async function insertIntoMongo(obj, collectionName) {
     if (!schemas[collectionName]) {
@@ -177,4 +162,4 @@ function getModel(collectionName) {
     return models[collectionName];
 }
 
-export { checkAdminNameAndPassword, connectDB, incrementHot, findInMongo, deleteFromMongo, updateInMongo, insertIntoMongo,getModel };
+export { checkAdminNameAndPassword, connectDB, findInMongo, deleteFromMongo, updateInMongo, insertIntoMongo,getModel };

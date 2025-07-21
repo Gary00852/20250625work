@@ -311,15 +311,11 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
         const minPriceNum = Number(minprice);
         const maxPriceNum = Number(maxprice);
 
-        if (isNaN(minPriceNum) || isNaN(maxPriceNum) || minPriceNum > maxPriceNum || maxPriceNum < 0|| minPriceNum < 0) {
+        if (isNaN(minPriceNum) || isNaN(maxPriceNum) || minPriceNum > maxPriceNum || maxPriceNum < 0 || minPriceNum < 0) {
             res.status(401).json({ error: '請輸入正確的最低和最高價格' });
         }
         const Model = getModel('product');
         const result = await Model.find({ name: { $regex: keyword, $options: 'i' }, price_hkd: { $gte: minPriceNum, $lte: maxPriceNum } });
-
-        if (result.length === 0) {
-            res.status(401).json({ error: "沒有找到相關資料" });
-        }
         res.json(result);
     } catch (error) {
         console.error(error.message);
@@ -333,9 +329,6 @@ router.get('/search/:param1', async (req, res) => {
         const { param1: keyword } = req.params;
         const Model = getModel('product');
         const result = await Model.find({ name: { $regex: keyword, $options: 'i' } });
-        if (result.length === 0) {
-            res.status(401).json({ error: "沒有找到相關資料" });
-        }
         res.json(result);
     } catch (error) {
         console.error(error.message);
@@ -348,7 +341,7 @@ router.get('/question/:param1', async (req, res) => {
     try {
         const { param1: keyword } = req.params;
         const Model = getModel('question');
-        const result = await Model.find({ question: { $regex: keyword, $options: 'i' }});
+        const result = await Model.find({ question: { $regex: keyword, $options: 'i' } });
         res.json(result);
     } catch (error) {
         console.error(error.message);
@@ -404,6 +397,24 @@ router.get('/top5Product', async (req, res) => {
         res.status(500).json({ error: '獲取商品熱度前五數據錯誤' });
     }
 })
+
+// 20250721 自增加使用post安全少少
+router.post('/incrementHot', async (req, res) => {
+    try {
+        const { _id } = req.body;
+        const Model = getModel('product');
+        await Model.findByIdAndUpdate(
+            _id,
+            { $inc: { hot: 1 } }, // $inc 遞增 hot
+            { new: true }
+        )
+        res.status(200).json({ success: true, message: `ID:${_id}自增加完成` });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: '自動遞增功能錯誤' });
+    }
+});
 
 router.post("/login", authenticate, (req, res) => {
     const token = jwt.sign(req.user, process.env.JWT_SECRET, { "expiresIn": "1h" })
