@@ -31,7 +31,7 @@
       <input id="shop-latitude" type="number" placeholder="Latitude" class="w-full p-2 mb-2 border rounded" required>
       <input id="shop-longitude" type="number" placeholder="Longitude" class="w-full p-2 mb-2 border rounded" required>
       <input id="shop-phone" type="text" placeholder="Phone" class="w-full p-2 mb-2 border rounded" required>
-      <input id="shop-phone" type="text" placeholder="Phone" class="w-full p-2 mb-2 border rounded" required>
+      <input id="shop-openhours" type="text" placeholder="opening_hours" class="w-full p-2 mb-2 border rounded" required>
       <div class="flex space-x-4">
         <button id="btn-create" onclick="createProduct()"
           class="flex-1 bg-green-500 text-white p-2 rounded hover:bg-green-600">建立</button>
@@ -143,7 +143,7 @@
           <span>${item.name}</span>
           <div>
             <button onclick="editItem('${item._id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">修改</button>
-            <button onclick="if(confirm('確定要刪除這個物品嗎？')) deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
+            <button onclick="if(confirm('確定要刪除這一項嗎？')) deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
           </div>
         `;
         list.appendChild(div);
@@ -204,7 +204,8 @@
         address: document.getElementById('shop-address').value.trim(),
         latitude: Number(document.getElementById('shop-latitude').value),
         longitude: Number(document.getElementById('shop-longitude').value),
-        phone: document.getElementById('shop-phone').value.trim()
+        phone: document.getElementById('shop-phone').value.trim(),
+        opening_hours: document.getElementById('shop-openhours').value.trim()
       };
     }
     function validateForm() {
@@ -216,7 +217,6 @@
     async function createProduct() {
       if (!validateForm()) return;
       await saveItem(null, getFormData());
-      console.log(getFormData())
       setCreateMode();
     }
     async function updateProduct() {
@@ -240,14 +240,14 @@
           },
           body: JSON.stringify(data)
         });
-        console.log(response.status)
+        // console.log(response.status)
         if (response.status === 201 || response.status === 200) {
-          alert(`${collection} ${id ? 'updated' : 'created'} successfully`);
+          alert(`${collection} ${id ? '資料已更新' : '資料已建立'} `);
           loadData();
           document.querySelectorAll(`#${collection}-form input, #${collection}-form textarea`).forEach(input => input.value = '');
           document.getElementById(`${collection}-id`).value = '';
         } else {
-          alert(`Failed to ${id ? 'update' : 'create'} ${collection}`);
+          alert(`錯誤的 ${id ? '更新' : '建立'} ${collection}`);
         }
       } catch (error) {
         console.error(`Error saving ${collection}:`, error);

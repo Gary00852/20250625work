@@ -136,7 +136,7 @@
           <span>${item.question}</span>
           <div>
             <button onclick="editItem('${item._id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">修改</button>
-            <button onclick="if(confirm('確定要刪除這個物品嗎？')) deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
+            <button onclick="if(confirm('確定要刪除這一項嗎？')) deleteItem('${item._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
           </div>
         `;
         list.appendChild(div);
@@ -175,21 +175,20 @@
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (response.status === 200) 
-           { alert('刪除成功'); loadData(); }
-        else 
+        if (response.status === 200) { alert('刪除成功'); loadData(); }
+        else
           alert('刪除失敗');
       } catch (error) {
         console.error(`Error deleting ${collection}:`, error);
       }
     }
-       /* ---------- 表單處理 ---------- */
+    /* ---------- 表單處理 ---------- */
     function getFormData() {
       return {
         question: document.getElementById('question-question').value.trim(),
         answer: document.getElementById('question-answer').value.trim(),
       };
-    } 
+    }
     function validateForm() {
       const data = getFormData();
       const ok = Object.values(data).every(v => v !== '' && !Number.isNaN(v));
@@ -233,7 +232,7 @@
           body: JSON.stringify(data)
         });
         if (response.status === 201 || response.status === 200) {
-          alert(`問答 ${id ? '更新' : '建立'} 成功`);
+          alert(`問答已${id ? '更新' : '建立'}`);
           loadData();
           document.querySelectorAll(`#${collection}-form input, #${collection}-form textarea`).forEach(input => input.value = '');
           document.getElementById(`${collection}-id`).value = '';

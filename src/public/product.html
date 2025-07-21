@@ -117,7 +117,7 @@
           <span>${i.name}</span>
           <div>
             <button onclick="editItem('${i._id}')" class="bg-yellow-500 text-white px-2 py-1 rounded mr-2">修改</button>
-            <button onclick="if(confirm('確定要刪除這個物品嗎？')) deleteItem('${i._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
+            <button onclick="if(confirm('確定要刪除這一項嗎？')) deleteItem('${i._id}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button>
           </div>`;
         list.appendChild(div);
       });
@@ -131,8 +131,7 @@
     async function deleteItem(id) {
       try {
         const res = await fetch(`/${collection}/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-        if (res.status === 200) 
-          { alert('刪除成功'); loadData(); }
+        if (res.status === 200) { alert('刪除成功'); loadData(); }
         else alert('刪除失敗');
       } catch (e) { console.error(e); }
     }
@@ -175,9 +174,9 @@
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(data)
         });
-        if (res.status === 200) { 
-          alert(`${id ? '更新' : '建立'}成功`); 
-          loadData(); 
+        if (res.status === 200 || res.status === 201) {
+          alert(`${id ? '更新' : '建立'}成功`);
+          loadData();
         }
         else alert('操作失敗');
       } catch (e) { console.error(e); }
