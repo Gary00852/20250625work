@@ -9,8 +9,8 @@ dotenv.config();
 const router = express.Router();
 
 router.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        return res.status(400).json({ error: '錯誤的JSON輸入' });
+    if (err instanceof SyntaxError && err.status === 401 && 'body' in err) {
+        return res.status(401).json({ error: '錯誤的JSON輸入' });
     }
     next(err);
 })
@@ -24,7 +24,7 @@ const authenticate = async (req, res, next) => {
         next();
     }
     else {
-        res.status(400).json({ error: "賬號或密碼錯誤" });
+        res.status(401).json({ error: "賬號或密碼錯誤" });
     }
 }
 
@@ -107,13 +107,13 @@ router.post("/product", authorize, async (req, res) => {
     try {
         const { error } = productSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ success: false, message: error.details[0].message });
+            return res.status(401).json({ success: false, message: error.details[0].message });
         }
         const resultObj = await insertIntoMongo(req.body, 'product');
         if (resultObj.success) {
             res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     } catch (error) {
         console.error(error.message);
@@ -137,13 +137,13 @@ router.put("/product/:pid", authorize, async (req, res) => {
     try {
         const { error } = productSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ success: false, message: error.details[0].message });
+            return res.status(401).json({ success: false, message: error.details[0].message });
         }
         const resultObj = await updateInMongo(req.params.pid, req.body, 'product');
         if (resultObj.success) {
             res.status(200).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
@@ -159,7 +159,7 @@ router.delete("/product/:pid", authorize, async (req, res) => {
         if (resultObj.success) {
             res.status(200).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
@@ -175,13 +175,13 @@ router.post("/shop", authorize, async (req, res) => {
     try {
         const { error } = shopSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ success: false, message: error.details[0].message });
+            return res.status(401).json({ success: false, message: error.details[0].message });
         }
         const resultObj = await insertIntoMongo(req.body, 'shop');
         if (resultObj.success) {
             res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     } catch (error) {
         console.error(error.message);
@@ -205,13 +205,13 @@ router.put("/shop/:pid", authorize, async (req, res) => {
     try {
         const { error } = shopSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            return res.status(401).json({ error: error.details[0].message });
         }
         const resultObj = await updateInMongo(req.params.pid, req.body, 'shop');
         if (resultObj.success) {
             res.status(200).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
@@ -227,7 +227,7 @@ router.delete("/shop/:pid", authorize, async (req, res) => {
         if (resultObj.success) {
             res.status(200).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
@@ -243,13 +243,13 @@ router.post("/question", authorize, async (req, res) => {
     try {
         const { error } = questionSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ success: false, message: error.details[0].message });
+            return res.status(401).json({ success: false, message: error.details[0].message });
         }
         const resultObj = await insertIntoMongo(req.body, 'question');
         if (resultObj.success) {
             res.status(201).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     } catch (error) {
         console.error(error.message);
@@ -273,13 +273,13 @@ router.put("/question/:pid", authorize, async (req, res) => {
     try {
         const { error } = questionSchema.validate(req.body);
         if (error) {
-            return res.status(400).json({ error: error.details[0].message });
+            return res.status(401).json({ error: error.details[0].message });
         }
         const resultObj = await updateInMongo(req.params.pid, req.body, 'question');
         if (resultObj.success) {
             res.status(200).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
@@ -295,7 +295,7 @@ router.delete("/question/:pid", authorize, async (req, res) => {
         if (resultObj.success) {
             res.status(200).json({ success: true, message: resultObj.message, data: resultObj.data });
         } else {
-            res.status(400).json({ success: false, message: resultObj.message });
+            res.status(401).json({ success: false, message: resultObj.message });
         }
     }
     catch (error) {
@@ -312,13 +312,13 @@ router.get('/search/:param1/:param2/:param3', async (req, res) => {
         const maxPriceNum = Number(maxprice);
 
         if (isNaN(minPriceNum) || isNaN(maxPriceNum) || minPriceNum > maxPriceNum || maxPriceNum < 0|| minPriceNum < 0) {
-            res.status(400).json({ error: '請輸入正確的最低和最高價格' });
+            res.status(401).json({ error: '請輸入正確的最低和最高價格' });
         }
         const Model = getModel('product');
         const result = await Model.find({ name: { $regex: keyword, $options: 'i' }, price_hkd: { $gte: minPriceNum, $lte: maxPriceNum } });
 
         if (result.length === 0) {
-            res.status(404).json({ error: "沒有找到相關資料" });
+            res.status(401).json({ error: "沒有找到相關資料" });
         }
         res.json(result);
     } catch (error) {
@@ -334,7 +334,7 @@ router.get('/search/:param1', async (req, res) => {
         const Model = getModel('product');
         const result = await Model.find({ name: { $regex: keyword, $options: 'i' } });
         if (result.length === 0) {
-            res.status(404).json({ error: "沒有找到相關資料" });
+            res.status(401).json({ error: "沒有找到相關資料" });
         }
         res.json(result);
     } catch (error) {
@@ -370,7 +370,7 @@ const validateLatLong = (req, res, next) => {
         longitude < -180 ||
         longitude > 180
     ) {
-        return res.status(400).json({ error: '輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180' });
+        return res.status(401).json({ error: '輸入的經緯度有誤，緯度應在 -90 ~ 90, 經度應在 -180 ~ 180' });
     }
     req.coords = { latitude, longitude };
     next();
